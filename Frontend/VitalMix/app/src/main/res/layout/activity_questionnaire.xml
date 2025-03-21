@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".auth.RegisterActivity"
+    android:background="@color/lightgreen">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/border">
+
+            <TextView
+                android:id="@+id/questionnaire_heading_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Quick Questionnaire!"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textColor="@color/green" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/gender_tv"
+                android:layout_below="@id/questionnaire_heading_tv"
+                android:text="Gender:"
+                android:textColor="@color/green"
+                android:layout_marginTop="15dp" />
+
+            <EditText
+                android:id="@+id/gender_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Male, Female, Other"
+                android:layout_below="@id/gender_tv"
+                android:padding="3dp"
+                android:background="@drawable/border" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/age_tv"
+                android:layout_below="@id/gender_et"
+                android:text="Age:"
+                android:textColor="@color/green"
+                android:layout_marginTop="15dp" />
+
+            <EditText
+                android:id="@+id/age_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Age"
+                android:layout_below="@id/age_tv"
+                android:padding="3dp"
+                android:background="@drawable/border" />
+
+            <LinearLayout
+                android:id="@+id/height_weight_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/age_et"
+                android:orientation="horizontal"
+                android:layout_marginTop="15dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/height_tv"
+                        android:text="Height:"
+                        android:textColor="@color/green" />
+
+                    <EditText
+                        android:id="@+id/height_et"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="cm"
+                        android:padding="3dp"
+                        android:background="@drawable/border" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/weight_tv"
+                        android:text="Weight:"
+                        android:textColor="@color/green" />
+
+                    <EditText
+                        android:id="@+id/weight_et"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="kg"
+                        android:padding="3dp"
+                        android:background="@drawable/border" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/fitness_goals_tv"
+                android:layout_below="@id/height_weight_layout"
+                android:text="Current Fitness Goals:"
+                android:textColor="@color/green"
+                android:layout_marginTop="15dp" />
+
+            <Spinner
+                android:id="@+id/fitness_goals_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fitness_goals_tv"
+                android:entries="@array/fitness_goals_array"
+                android:padding="3dp"
+                android:background="@drawable/border" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/activity_level_tv"
+                android:layout_below="@id/fitness_goals_spinner"
+                android:text="Activity Level:"
+                android:textColor="@color/green"
+                android:layout_marginTop="15dp" />
+
+            <Spinner
+                android:id="@+id/activity_level_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/activity_level_tv"
+                android:entries="@array/activity_level_array"
+                android:padding="3dp"
+                android:background="@drawable/border" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/diet_info_tv"
+                android:layout_below="@id/activity_level_spinner"
+                android:text="Dietary Preference:"
+                android:textColor="@color/green"
+                android:layout_marginTop="15dp" />
+
+            <EditText
+                android:id="@+id/diet_info_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Vegetarian, Vegan, etc."
+                android:layout_below="@id/diet_info_tv"
+                android:padding="3dp"
+                android:background="@drawable/border" />
+
+            <Button
+                android:id="@+id/save_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save and Continue"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:layout_below="@id/diet_info_et"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/green" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/save_btn"
+                android:layout_marginTop="20dp" />
+
+        </RelativeLayout>
+    </ScrollView>

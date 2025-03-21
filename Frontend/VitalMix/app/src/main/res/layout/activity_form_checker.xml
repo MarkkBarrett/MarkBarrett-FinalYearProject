@@ -1,0 +1,165 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.FormCheckerActivity"
+    android:background="@color/lightgreen">
+
+    <!-- Scrollable Content -->
+
+    <!-- Bottom Navigation -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation"
+        android:layout_marginBottom="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@drawable/border"
+            android:padding="20dp">
+
+            <!-- Exercise and Angle Selection -->
+            <TextView
+                android:id="@+id/exercise_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Select Exercise and Angle:"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <Spinner
+                android:id="@+id/exercise_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/exercise_tv"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/border"
+                android:entries="@array/exercise_array"
+                android:padding="3dp" />
+
+            <!-- Upload Video Section -->
+            <TextView
+                android:id="@+id/upload_video_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/exercise_spinner"
+                android:layout_marginTop="20dp"
+                android:text="Upload Video:"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <RelativeLayout
+                android:id="@+id/upload_container"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@id/upload_video_tv"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/border">
+
+                <ImageView
+                    android:id="@+id/upload_icon"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_video"
+                    app:tint="@color/green" />
+
+                <TextView
+                    android:id="@+id/upload_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/upload_icon"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="10dp"
+                    android:text="Tap to Upload"
+                    android:textColor="@color/green"
+                    android:textSize="14sp" />
+            </RelativeLayout>
+
+            <!-- Calculate Score Button -->
+            <Button
+                android:id="@+id/calculate_score_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/upload_container"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/green"
+                android:text="Calculate Score"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textColor="@color/white" />
+
+            <!-- Results Section -->
+            <View
+                android:id="@+id/separator_line"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/calculate_score_btn"
+                android:layout_marginTop="20dp"
+                android:background="@color/green" />
+
+            <TextView
+                android:id="@+id/results_heading_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/separator_line"
+                android:layout_marginTop="10dp"
+                android:text="Results"
+                android:textColor="@color/green"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/score_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/results_heading_tv"
+                android:layout_marginTop="10dp"
+                android:text="Score: -%"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/feedback_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/score_tv"
+                android:layout_marginTop="10dp"
+                android:text="Feedback: -"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <!-- Processed Video Display -->
+            <RelativeLayout
+                android:id="@+id/processed_video_container"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@id/feedback_tv"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/border">
+
+                <!-- VideoView for displaying processed video -->
+                <VideoView
+                    android:id="@+id/processed_video_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+            </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav"
+        app:labelVisibilityMode="labeled"
+        android:background="@color/lightgreen" />
+</RelativeLayout> 

@@ -1,0 +1,68 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lightgreen"
+    tools:context=".ui.StartWorkoutActivity">
+
+    <!-- Main Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation">
+
+        <!-- White Layout with Green Border -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:layout_margin="20dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/border">
+
+            <!-- Back Button -->
+            <Button
+                android:id="@+id/back_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Back"
+                android:layout_marginBottom="20dp"
+                android:layout_marginStart="16dp"
+                android:layout_alignParentTop="true"
+                android:onClick="onBackPressed" />
+
+            <!-- Recycler View for Exercises -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/exercise_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/back_btn"
+                android:layout_marginTop="15dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical" />
+
+            <!-- Finish Workout Button -->
+            <Button
+                android:id="@+id/finish_workout_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Finish Workout"
+                android:layout_below="@id/exercise_recycler_view"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/green"
+                android:textColor="@color/white" />
+        </RelativeLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav"
+        app:labelVisibilityMode="labeled"
+        android:background="@color/lightgreen" />
+</RelativeLayout>

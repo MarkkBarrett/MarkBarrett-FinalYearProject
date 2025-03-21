@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">VitalMix</string>
+
+    <string-array name="fitness_goals_array">
+        <item>General Fitness</item>
+        <item>Lose Weight</item>
+        <item>Build Muscle</item>
+        <item>Improve Cardio</item>
+        <item>Improve Flexibility</item>
+        <item>Increase Strength</item>
+        <item>Rehab Injury</item>
+    </string-array>
+
+    <string-array name="activity_level_array">
+        <item>Sedentary (No exercise)</item>
+        <item>Lightly Active (1-3 days/week)</item>
+        <item>Moderately Active (3-5 days/week)</item>
+        <item>Very Active (6-7 days/week)</item>
+        <item>Extra Active (Physical job or intense training)</item>
+    </string-array>
+
+    <string-array name="exercise_array">
+        <item>squat/behind</item>
+    </string-array>
+
+</resources>

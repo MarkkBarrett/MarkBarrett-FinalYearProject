@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Meal Time (Breakfast, Lunch, etc.) -->
+        <TextView
+            android:id="@+id/meal_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Breakfast"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/green" />
+
+        <!-- Meal Name -->
+        <TextView
+            android:id="@+id/meal_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 Scrambled Eggs on Toast"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:paddingTop="4dp" />
+
+        <!-- Calories -->
+        <TextView
+            android:id="@+id/meal_calories"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="350 kcal"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            android:paddingTop="4dp" />
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:paddingTop="8dp">
+
+            <!-- Change Meal -->
+            <Button
+                android:id="@+id/btn_change_meal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Change"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/green"
+                android:textSize="14sp" />
+
+            <!-- View Macros -->
+            <Button
+                android:id="@+id/btn_view_macros"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Macros"
+                android:textColor="@color/green"
+                android:backgroundTint="@color/white"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
