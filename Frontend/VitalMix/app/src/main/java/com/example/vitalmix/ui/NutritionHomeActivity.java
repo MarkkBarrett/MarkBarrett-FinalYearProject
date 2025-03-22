@@ -29,11 +29,11 @@ public class NutritionHomeActivity extends AppCompatActivity {
             } else if (id == R.id.nav_workouts) {
                 startActivity(new Intent(this, StartWorkoutActivity.class));
                 return true;
+            } else if (id == R.id.nav_form) {
+                startActivity(new Intent(this, FormCheckerActivity.class));
+                return true;
             } else if (id == R.id.nav_nutrition) {
                 return true; // Stay on Nutrition
-            } else if (id == R.id.nav_progress) {
-                startActivity(new Intent(this, StartWorkoutActivity.class)); //ProgressActivity
-                return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;

@@ -31,11 +31,11 @@ public class ProfileActivity extends AppCompatActivity {
             } else if (id == R.id.nav_workouts) {
                 startActivity(new Intent(this, StartWorkoutActivity.class));
                 return true;
+            } else if (id == R.id.nav_form) {
+                startActivity(new Intent(this, FormCheckerActivity.class));
+                return true;
             } else if (id == R.id.nav_nutrition) {
                 startActivity(new Intent(this, NutritionHomeActivity.class));
-                return true;
-            } else if (id == R.id.nav_progress) {
-                startActivity(new Intent(this, DashboardActivity.class)); //ProgressActivity
                 return true;
             } else if (id == R.id.nav_profile) {
                 return true; // Stay on the profile

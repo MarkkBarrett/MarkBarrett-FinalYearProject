@@ -14,6 +14,7 @@ import com.example.vitalmix.api.ApiClientFastAPI;
 import com.example.vitalmix.api.ApiResponseFastAPI;
 import com.example.vitalmix.api.ApiService;
 import com.example.vitalmix.utils.FileUtils;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import java.io.File;
 import java.util.Map;
@@ -63,6 +64,9 @@ public class FormCheckerActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please select a video", Toast.LENGTH_SHORT).show();
             }
         });
+
+        setupBottomNavigation();
+
     }
 
     // Launch picker
@@ -136,5 +140,31 @@ public class FormCheckerActivity extends AppCompatActivity {
             Log.e("FormCheck", "Failed to play video", e);
             Toast.makeText(this, "Error playing video", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_dashboard) {
+                startActivity(new Intent(this, DashboardActivity.class));
+                return true;
+            } else if (id == R.id.nav_workouts) {
+                startActivity(new Intent(this, StartWorkoutActivity.class));
+                return true;
+            } else if (id == R.id.nav_form) {
+                return true; // Stay on form checker
+            } else if (id == R.id.nav_nutrition) {
+                startActivity(new Intent(this, NutritionHomeActivity.class));
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
+            }
+            return false;
+        });
+
+        bottomNavigationView.setSelectedItemId(R.id.nav_form); // highlight form tab
     }
 }

@@ -135,22 +135,13 @@
                 android:textSize="16sp" />
 
             <!-- Processed Video Display -->
-            <RelativeLayout
-                android:id="@+id/processed_video_container"
+            <VideoView
+                android:id="@+id/processed_video_view"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="400dp"
                 android:layout_below="@id/feedback_tv"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/border">
-
-                <!-- VideoView for displaying processed video -->
-                <VideoView
-                    android:id="@+id/processed_video_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
-
-            </RelativeLayout>
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp" />
         </RelativeLayout>
     </ScrollView>
 

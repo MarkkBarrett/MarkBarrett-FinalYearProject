@@ -103,7 +103,7 @@ def predict_form(video_path, exercise_name):
     feedback = "Excellent form!" if accuracy >= 90 else "Needs improvement."
     return {"exercise": exercise_name, "accuracy": accuracy, "feedback": feedback}
 
-# Generate a processed video with keypoint overlay
+# Generate a processed video with keypoint overlay and labeled joints
 def process_and_overlay_video(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
@@ -112,8 +112,15 @@ def process_and_overlay_video(input_path, output_path):
 
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Using 'avc1' for streamable mp4
     out = cv2.VideoWriter(output_path, fourcc, 30.0, (width, height))
+
+    # Only label these keypoints for now (used in squat form)
+    keypoints_to_label = {
+        "left_ankle", "left_knee", "left_hip",
+        "right_ankle", "right_knee", "right_hip",
+        "left_shoulder", "right_shoulder"
+    }
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -122,10 +129,17 @@ def process_and_overlay_video(input_path, output_path):
 
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose_model.process(rgb)
+
         if results.pose_landmarks:
-            for lm in results.pose_landmarks.landmark:
+            for idx, lm in enumerate(results.pose_landmarks.landmark):
                 x, y = int(lm.x * width), int(lm.y * height)
                 cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+
+                # Get joint name from index
+                joint_name = mp_pose.PoseLandmark(idx).name.lower()
+                if joint_name in keypoints_to_label:
+                    cv2.putText(frame, joint_name.replace("_", " "), (x + 5, y - 5),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
         out.write(frame)
 
