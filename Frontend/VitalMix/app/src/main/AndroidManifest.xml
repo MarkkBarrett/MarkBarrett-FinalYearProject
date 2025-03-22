@@ -18,13 +18,13 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".auth.RegisterActivity"
-            android:exported="true">
-        <!-- Commented out to change the default launch activity -->
+            android:name=".auth.RegisterActivity">
+            <!--android:exported="true">
+        Commented out to change the default launch activity
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>-->
         </activity>
         <activity android:name=".auth.LoginActivity" />
         <activity android:name=".ui.DashboardActivity" />
@@ -32,14 +32,14 @@
         <activity android:name=".ui.ProfileActivity" />
         <activity android:name=".ui.StartWorkoutActivity" />
         <activity android:name=".ui.NutritionHomeActivity" />
-        <activity android:name=".ui.FormCheckerActivity" />
-        <!--android:exported="true">
-        Set FormCheckerActivity as the new launcher for easy testing
+        <activity android:name=".ui.FormCheckerActivity"
+        android:exported="true">
+        <!--Set FormCheckerActivity as the new launcher for easy testing-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>-->
+        </activity>
 
     </application>
 
