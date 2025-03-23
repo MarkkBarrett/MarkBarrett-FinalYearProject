@@ -35,4 +35,13 @@ public class SessionManager {
         SharedPreferences sharedPreferences = context.getSharedPreferences("VitalMixPrefs", Context.MODE_PRIVATE);
         return sharedPreferences.getString(USER_EMAIL_KEY, null);
     }
+
+    // Clear all saved session data
+    public static void clearSession(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("VitalMixPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Remove all keys
+        editor.apply();
+    }
+
 }

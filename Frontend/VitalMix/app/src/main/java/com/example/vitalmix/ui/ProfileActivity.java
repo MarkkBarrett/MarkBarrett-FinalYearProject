@@ -12,6 +12,7 @@ import com.example.vitalmix.R;
 import com.example.vitalmix.api.ApiClient;
 import com.example.vitalmix.api.ApiResponse;
 import com.example.vitalmix.api.ApiService;
+import com.example.vitalmix.auth.LoginActivity;
 import com.example.vitalmix.auth.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
@@ -47,6 +48,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Setup bottom navigation
         setupBottomNavigation();
+
+        // Handle buttons
+        logout();
     }
 
     // Fetch user profile data from backend
@@ -84,6 +88,19 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, "API Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("ProfileAPI", "API failure: ", t);
             }
+        });
+    }
+
+    // Handles logout button
+    private void logout() {
+        findViewById(R.id.logout_btn).setOnClickListener(v -> {
+            // Clear session data
+            SessionManager.clearSession(this);
+
+            // Redirect to login and clear activity stack
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         });
     }
 
