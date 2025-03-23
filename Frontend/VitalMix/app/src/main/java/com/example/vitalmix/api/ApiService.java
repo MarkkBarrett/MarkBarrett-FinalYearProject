@@ -46,6 +46,10 @@ public interface ApiService {
     @POST("/api/workout/session")
     Call<ApiResponse> saveWorkoutSession(@Body WorkoutSession workoutSession);
 
+    // Get users profile data
+    @GET("/api/profile")
+    Call<ApiResponse> getUserProfile(@Query("userId") String userId);
+
     @Multipart
     @POST("/predict-form/")
     Call<ApiResponseFastAPI> uploadFormCheck(@Part MultipartBody.Part file, @Part("exercise") RequestBody exercise);

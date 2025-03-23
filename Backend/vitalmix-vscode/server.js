@@ -4,6 +4,7 @@ const authRoutes = require('./routes/auth'); // Authentication routes
 const workoutRoutes = require('./routes/workout'); // Workout routes
 const exerciseRoutes = require('./routes/exercises'); // Exercise routes
 const workoutSessionRoutes = require('./routes/workoutSession'); // Workout Session routes
+const profileRoutes = require('./routes/profile'); // Profile Home route
 
 
 // Initialize the Express app
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/workout', workoutRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/workout', workoutSessionRoutes);
+app.use('/api/profile', profileRoutes); 
 
 // basic test route
 app.get('/', (req, res) => {
