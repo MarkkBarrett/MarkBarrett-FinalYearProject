@@ -1,5 +1,6 @@
 package com.example.vitalmix.api;
 
+import com.example.vitalmix.models.ChangePassword;
 import com.example.vitalmix.models.User;
 import com.example.vitalmix.models.WorkoutSession;
 
@@ -49,6 +50,9 @@ public interface ApiService {
     // Get users profile data
     @GET("/api/profile")
     Call<ApiResponse> getUserProfile(@Query("userId") String userId);
+
+    @PUT("/api/profile/changePassword")
+    Call<ApiResponse> changePassword(@Body ChangePassword request);
 
     @Multipart
     @POST("/predict-form/")

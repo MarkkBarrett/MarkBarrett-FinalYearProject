@@ -16,7 +16,7 @@ router.get('/byIds', async (req, res) => {
     }
 
     try {
-        // Convert comma-separated string to an array (if needed)
+        // Fix comma seperation to an array 
         const idsArray = Array.isArray(exerciseIds) ? exerciseIds : exerciseIds.split(',');
 
         // Fetch exercises matching provided IDs

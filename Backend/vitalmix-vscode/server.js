@@ -16,17 +16,12 @@ connectDB();
 // parse JSON request bodies
 app.use(express.json());
 
-// set auth routes
+// set routes
 app.use('/api/auth', authRoutes);  
 app.use('/api/workout', workoutRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/workout', workoutSessionRoutes);
 app.use('/api/profile', profileRoutes); 
-
-// basic test route
-app.get('/', (req, res) => {
-    res.send('Hello from the VitalMix backend!');
-});
 
 // Start the server and listen on port
 const PORT = process.env.PORT || 5000;

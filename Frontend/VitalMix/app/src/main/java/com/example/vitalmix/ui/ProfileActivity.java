@@ -50,6 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
         setupBottomNavigation();
 
         // Handle buttons
+        changePassword();
         logout();
     }
 
@@ -88,6 +89,13 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, "API Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("ProfileAPI", "API failure: ", t);
             }
+        });
+    }
+
+    // Handles Change Password button
+    private void changePassword() {
+        findViewById(R.id.change_password_btn).setOnClickListener(v -> {
+            startActivity(new Intent(this, ChangePasswordActivity.class));
         });
     }
 

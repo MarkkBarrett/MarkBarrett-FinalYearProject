@@ -2,10 +2,12 @@ package com.example.vitalmix.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.vitalmix.R;
+import com.example.vitalmix.auth.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class DashboardActivity extends AppCompatActivity {
@@ -14,6 +16,9 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+
+        //set name
+        //updateWelcomeText();
 
         setupBottomNavigation(); // Initialize the bottom navigation
     }

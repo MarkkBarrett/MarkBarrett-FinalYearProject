@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); //remove and test... unnused 
 const WorkoutPlan = require('../models/WorkoutPlan');
 const router = express.Router();
 
@@ -8,13 +8,16 @@ const router = express.Router();
  * @desc Get the logged-in user's workout plan
  * @access Public
  */
+
 router.get('/plan', async (req, res) => {
     const { userId } = req.query;
 
+    // Check for userId
     if (!userId) {
         return res.status(400).json({ success: false, message: 'User ID is required' });
     }
 
+    // Find assosciated workout plan
     try {
         const plan = await WorkoutPlan.findOne({ userId });
 

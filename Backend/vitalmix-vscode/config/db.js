@@ -1,7 +1,7 @@
 // Import mongoose for interacting with MongoDB
 const mongoose = require('mongoose');
 
-// Function to connect to MongoDB
+//  Connect to MongoDB
 const connectDB = async () => {
     try {
         // Connect using the MongoDB URI

@@ -9,7 +9,7 @@ public class ApiResponse {
     private String redirectTo; // The redirection target for backend
     private Object data;      // Additional data returned by the server
     private User user; // User object to capture response
-    private int nextDayIndex; // Add this field to store the next workout day index
+    private int nextDayIndex; // store the next workout day index
 
     // Getters and Setters
     public boolean isSuccess() {

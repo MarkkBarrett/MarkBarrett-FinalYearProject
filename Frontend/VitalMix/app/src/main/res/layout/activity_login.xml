@@ -107,6 +107,5 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:layout_below="@id/no_user_tv"/>
 
-
     </RelativeLayout>
 </ScrollView>

@@ -9,7 +9,9 @@ const router = express.Router();
  * @desc Save a completed workout session
  * @access Public
  */
+
 router.post('/session', async (req, res) => {
+    //check let is variable?
     let { _id, sessionDate, workoutName, exerciseLogs } = req.body;
 
     const userId = _id; // Directly map _id to userId
@@ -19,7 +21,7 @@ router.post('/session', async (req, res) => {
     }
 
     try {
-        // Convert userId to ObjectId
+        // Convert userId to ObjectId (might not need this)
         const objectId = new mongoose.Types.ObjectId(userId);
 
         // Create new workout session
@@ -42,6 +44,7 @@ router.post('/session', async (req, res) => {
             await userPlan.save();
         }
 
+        // return messages
         res.json({ success: true, message: 'Workout session saved', nextDayIndex: userPlan ? userPlan.currentDayIndex : 0 });
     } catch (err) {
         console.error('Error saving workout session:', err.message);

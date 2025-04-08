@@ -11,7 +11,7 @@ const WorkoutPlanSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Link to User
     planName: { type: String, required: true },
     description: { type: String },
-    focus: [{ type: String, required: true }], // e.g., "Build Muscle"
+    focus: [{ type: String, required: true }], // build muscle etc.
     currentDayIndex: { type: Number, default: 0 }, // Tracks progress
     workouts: [WorkoutSchema] // Array of workouts
 });
