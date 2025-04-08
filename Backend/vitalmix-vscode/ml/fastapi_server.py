@@ -10,8 +10,8 @@ import os
 app = FastAPI()
 print("FastAPI working directory:", os.getcwd())
 
-# Load LSTM model
-MODEL_PATH = r"C:\Users\User\VitalMixFYP\Backend\vitalmix-vscode\ml\form_check_lstm_model.h5"
+# Load new LSTM model
+MODEL_PATH = r"C:\Users\User\VitalMixFYP\Backend\vitalmix-vscode\ml\form_check_lstm_model_v2.h5"
 model = tf.keras.models.load_model(MODEL_PATH)
 
 # Define constants
@@ -19,15 +19,10 @@ VIDEO_SAVE_DIR = os.path.join(os.path.dirname(__file__), "temp")  # Temporary sa
 os.makedirs(VIDEO_SAVE_DIR, exist_ok=True)
 
 KEYPOINTS = [
-    "left_wrist", "left_elbow", "left_shoulder",
-    "left_ankle", "left_knee", "left_hip",
-    "right_ankle", "right_knee", "right_hip",
-    "right_wrist", "right_elbow", "right_shoulder"
+    "left_shoulder", "left_hip", "left_knee", "left_ankle", "left_heel",
+    "right_shoulder", "right_hip", "right_knee", "right_ankle", "right_heel"
 ]
-NUM_KEYPOINTS = 12
-NUM_ANGLES = 4
-NUM_ALIGNMENT = 1
-FEATURE_SIZE = NUM_KEYPOINTS * 3 + NUM_ANGLES + NUM_ALIGNMENT
+FEATURE_SIZE = len(KEYPOINTS) * 3 + 1  # x, y, visibility per point + 1 angle
 MAX_FRAMES = 100
 
 # Setup MediaPipe
@@ -36,28 +31,43 @@ pose_model = mp_pose.Pose()
 
 # Calculate joint angles
 def calculate_joint_angle(a, b, c):
-    if not all([a, b, c]) or any(v is None for v in (a.get("x"), a.get("y"), b.get("x"), b.get("y"), c.get("x"), c.get("y"))):
+    if not all([a, b, c]):
         return None
-    a, b, c = np.array([a["x"], a["y"]]), np.array([b["x"], b["y"]]), np.array([c["x"], c["y"]])
-    ab, cb = a - b, c - b
-    dot = np.dot(ab, cb)
-    norm_ab = np.linalg.norm(ab)
-    norm_cb = np.linalg.norm(cb)
-    if norm_ab == 0 or norm_cb == 0:
-        return None
-    cosine = np.clip(dot / (norm_ab * norm_cb), -1.0, 1.0)
-    return float(np.degrees(np.arccos(cosine)))
+    a, b, c = np.array(a), np.array(b), np.array(c)
+    ba = a - b
+    bc = c - b
+    cosine = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-8)
+    return float(np.degrees(np.arccos(np.clip(cosine, -1.0, 1.0))))
+
+# Detect reps using left knee angle thresholds
+def detect_reps_from_angles(angle_series, down_thresh=110, up_thresh=160):
+    reps = []
+    in_rep = False
+    start = 0
+    for i, angle in enumerate(angle_series):
+        if angle is None:
+            continue
+        if angle < down_thresh and not in_rep:
+            in_rep = True
+            start = i
+        elif angle > up_thresh and in_rep:
+            in_rep = False
+            reps.append((start, i))
+    return reps
 
 # Extract keypoints for model input
 def extract_keypoints_for_model(video_path):
     cap = cv2.VideoCapture(video_path)
     frames_data = []
+    angle_series = []
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose_model.process(rgb)
+
         if results.pose_landmarks:
             kp_map = {}
             for lbl in KEYPOINTS:
@@ -67,35 +77,67 @@ def extract_keypoints_for_model(video_path):
                     kp_map[lbl] = [lm.x, lm.y, lm.visibility]
                 else:
                     kp_map[lbl] = [0, 0, 0]
-            vec = [v for lbl in KEYPOINTS for v in kp_map[lbl]]
-            raw_kp = {lbl: {"x": kp_map[lbl][0], "y": kp_map[lbl][1]} for lbl in KEYPOINTS}
-            angles = [
-                calculate_joint_angle(raw_kp["left_ankle"], raw_kp["left_knee"], raw_kp["left_hip"]),
-                calculate_joint_angle(raw_kp["right_ankle"], raw_kp["right_knee"], raw_kp["right_hip"]),
-                calculate_joint_angle(raw_kp["left_wrist"], raw_kp["left_elbow"], raw_kp["left_shoulder"]),
-                calculate_joint_angle(raw_kp["right_wrist"], raw_kp["right_elbow"], raw_kp["right_shoulder"]),
-            ]
-            align = abs(raw_kp["left_shoulder"]["x"] - raw_kp["right_shoulder"]["x"]) if all(
-                raw_kp[k]["x"] is not None for k in ["left_shoulder", "right_shoulder"]) else 0
-            vec += [a if a is not None else 0 for a in angles]
-            vec.append(align)
-            frames_data.append(vec)
+
+            # Get x/y for angle calc
+            try:
+                left_knee_angle = calculate_joint_angle(
+                    [kp_map["left_ankle"][0], kp_map["left_ankle"][1]],
+                    [kp_map["left_knee"][0], kp_map["left_knee"][1]],
+                    [kp_map["left_hip"][0], kp_map["left_hip"][1]]
+                )
+            except:
+                left_knee_angle = None
+
+            angle_series.append(left_knee_angle)
+
+            # Flatten keypoints
+            frame_features = []
+            for lbl in KEYPOINTS:
+                x, y, v = kp_map.get(lbl, [0, 0, 0])
+                frame_features.extend([x, y, v])
+            frame_features.append(left_knee_angle if left_knee_angle is not None else 0)
+
+            frames_data.append(frame_features)
         else:
             frames_data.append([0] * FEATURE_SIZE)
-    cap.release()
-    return np.array(frames_data, dtype=np.float32) if frames_data else np.zeros((1, FEATURE_SIZE), dtype=np.float32)
+            angle_series.append(None)
 
+    cap.release()
+    return np.array(frames_data, dtype=np.float32), angle_series
+
+    # Predict only during reps
     # Function to predict form accuracy
 def predict_form(video_path, exercise_name):
-    frames = extract_keypoints_for_model(video_path)
-    if len(frames) == 0:
-        return {"error": "No frames data"}
+    all_frames, angle_series = extract_keypoints_for_model(video_path)
+
+    # Detect rep segments
+    rep_ranges = detect_reps_from_angles(angle_series)
+
+    if not rep_ranges:
+        return {
+            "exercise": exercise_name,
+            "accuracy": 0.0,
+            "feedback": "No valid reps detected."
+        }
+
+    # Collect only frames within rep ranges
+    rep_frames = []
+    for start, end in rep_ranges:
+        rep_frames.extend(all_frames[start:end + 1])
+
+    if not rep_frames:
+        return {
+            "exercise": exercise_name,
+            "accuracy": 0.0,
+            "feedback": "Reps found but no usable frames."
+        }
 
     # Pad or trim to MAX_FRAMES
     padded = np.zeros((MAX_FRAMES, FEATURE_SIZE), dtype=np.float32)
-    if frames.shape[0] > MAX_FRAMES:
-        frames = frames[-MAX_FRAMES:]
-    padded[-frames.shape[0]:, :] = frames
+    rep_frames = np.array(rep_frames, dtype=np.float32)
+    if len(rep_frames) > MAX_FRAMES:
+        rep_frames = rep_frames[-MAX_FRAMES:]
+    padded[-len(rep_frames):, :] = rep_frames
 
     model_input = np.expand_dims(padded, axis=0)
     prediction = model.predict(model_input)[0][0]
@@ -103,7 +145,7 @@ def predict_form(video_path, exercise_name):
     feedback = "Excellent form!" if accuracy >= 90 else "Needs improvement."
     return {"exercise": exercise_name, "accuracy": accuracy, "feedback": feedback}
 
-# Generate a processed video with keypoint overlay and labeled joints
+# Generate a processed video with keypoint overlay and labeled points
 def process_and_overlay_video(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
@@ -186,4 +228,3 @@ async def stream_video(path: str):
     
     print(f"Serving streamable video at: {full_path}")
     return FileResponse(full_path, media_type="video/mp4", filename=os.path.basename(full_path))
-
