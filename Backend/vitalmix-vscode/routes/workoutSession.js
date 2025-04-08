@@ -11,7 +11,7 @@ const router = express.Router();
  */
 
 router.post('/session', async (req, res) => {
-    //check let is variable?
+    
     let { _id, sessionDate, workoutName, exerciseLogs } = req.body;
 
     const userId = _id; // Directly map _id to userId

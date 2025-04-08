@@ -31,11 +31,11 @@ public interface ApiService {
     @POST("api/auth/questionnaire")
     Call<ApiResponse> saveQuestionnaire(@Body User user);
 
-    // Fetch workout plan for the logged-in user
+    // Get workout plan for the logged-in user
     @GET("/api/workout/plan")
     Call<ApiResponse> getWorkoutPlan(@Query("userId") String userId);
 
-    // Fetch exercises by their IDs
+    // Get exercises by their IDs
     @GET("/api/exercises/byIds")
     Call<ApiResponse> getExercisesByIds(@Query("exerciseIds") List<String> exerciseIds);
 
@@ -53,6 +53,14 @@ public interface ApiService {
 
     @PUT("/api/profile/changePassword")
     Call<ApiResponse> changePassword(@Body ChangePassword request);
+
+    // Get all default workout plans
+    @GET("workout/defaultPlans")
+    Call<ApiResponse> getDefaultWorkoutPlans();
+
+    // Get recommended workout plan for a user
+    @GET("workout/recommendation")
+    Call<ApiResponse> getRecommendedPlan(@Query("userId") String userId);
 
     @Multipart
     @POST("/predict-form/")
