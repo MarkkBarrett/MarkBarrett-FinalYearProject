@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("LOGIN_DEBUG", "UserID received in login response: " + loggedInUser.getUserID());
                     SessionManager.saveLoggedInUserID(LoginActivity.this, loggedInUser.getUserID());
                     SessionManager.saveLoggedInUserEmail(LoginActivity.this, loggedInUser.getEmail());
+                    SessionManager.saveLoggedInUserFirstName(LoginActivity.this, loggedInUser.getFirstName());
 
                     // Redirect based on questionnaire completion
                     if ("Questionnaire".equals(redirectTo)) {

@@ -14,12 +14,12 @@
         android:background="@drawable/border"
         android:padding="10dp">
 
-        <!-- "Recommended" label if needed -->
+        <!-- Recommended label -->
         <TextView
             android:id="@+id/recommended_label_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Recommended"
+            android:text="Recommended For You"
             android:padding="4dp"
             android:textSize="12sp"
             android:textColor="@color/black"

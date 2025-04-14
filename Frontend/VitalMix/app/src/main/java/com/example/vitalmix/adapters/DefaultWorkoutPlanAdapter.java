@@ -67,6 +67,8 @@ public class DefaultWorkoutPlanAdapter extends RecyclerView.Adapter<DefaultWorko
         });
     }
 
+    // Also HANDLE general row click, maybe display exercises that are in it?
+
     @Override
     public int getItemCount() {
         return planList.size();

@@ -18,9 +18,17 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
 
         //set name
-        //updateWelcomeText();
+        updateWelcomeText();
 
         setupBottomNavigation(); // Initialize the bottom navigation
+    }
+
+    private void updateWelcomeText() {
+        String firstName = SessionManager.getLoggedInUserFirstName(this);
+        if (firstName != null && !firstName.isEmpty()) {
+            TextView welcomeTv = findViewById(R.id.welcome_tv);
+            welcomeTv.setText("Hi, " + firstName + "! Small steps today, big achievements tomorrow!");
+        }
     }
 
     // Method to set up bottom navigation
