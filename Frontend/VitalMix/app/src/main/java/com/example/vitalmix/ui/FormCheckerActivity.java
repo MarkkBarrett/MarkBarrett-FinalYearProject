@@ -1,6 +1,7 @@
 package com.example.vitalmix.ui;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ public class FormCheckerActivity extends AppCompatActivity {
     private Button calculateScoreBtn;
     private VideoView resultVideoView;
     private ApiService apiService;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,10 +97,21 @@ public class FormCheckerActivity extends AppCompatActivity {
         String selectedExercise = exerciseSpinner.getSelectedItem().toString();
         RequestBody exerciseBody = RequestBody.create(MediaType.parse("text/plain"), selectedExercise);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Sending your " + selectedExercise + " to the Model...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        // Timer to update messages every 12s
+        new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Extracting keypoints from your video..."), 12000);
+        new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Analysing your form..."), 28000);
+        new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Almost there..."), 36000);
+
         Call<ApiResponseFastAPI> call = apiService.uploadFormCheck(videoPart, exerciseBody);
         call.enqueue(new Callback<ApiResponseFastAPI>() {
             @Override
             public void onResponse(Call<ApiResponseFastAPI> call, Response<ApiResponseFastAPI> response) {
+                if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss(); // Hide loader
                 Log.d("FormCheck", "Raw response: " + response.toString());
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -124,6 +137,7 @@ public class FormCheckerActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ApiResponseFastAPI> call, Throwable t) {
+                if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss(); // Hide on failure
                 Log.e("FormCheck", "API call failed", t);
             }
         });
@@ -151,7 +165,7 @@ public class FormCheckerActivity extends AppCompatActivity {
                 startActivity(new Intent(this, DashboardActivity.class));
                 return true;
             } else if (id == R.id.nav_workouts) {
-                startActivity(new Intent(this, StartWorkoutActivity.class));
+                startActivity(new Intent(this, ChooseWorkoutActivity.class));
                 return true;
             } else if (id == R.id.nav_form) {
                 return true; // Stay on form checker

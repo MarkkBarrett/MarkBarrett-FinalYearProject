@@ -55,11 +55,11 @@ public interface ApiService {
     Call<ApiResponse> changePassword(@Body ChangePassword request);
 
     // Get all default workout plans
-    @GET("workout/defaultPlans")
+    @GET("/api/workout/defaultPlans")
     Call<ApiResponse> getDefaultWorkoutPlans();
 
     // Get recommended workout plan for a user
-    @GET("workout/recommendation")
+    @GET("/api/workout/recommendation")
     Call<ApiResponse> getRecommendedPlan(@Query("userId") String userId);
 
     @Multipart

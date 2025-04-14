@@ -224,7 +224,8 @@ public class StartWorkoutActivity extends AppCompatActivity {
                 startActivity(new Intent(this, DashboardActivity.class));
                 return true;
             } else if (id == R.id.nav_workouts) {
-                return true; // Stay on Workouts
+                startActivity(new Intent(this, ChooseWorkoutActivity.class));
+                return true;// Stay on Workouts
             } else if (id == R.id.nav_form) {
                 startActivity(new Intent(this, FormCheckerActivity.class));
                 return true;
@@ -239,6 +240,6 @@ public class StartWorkoutActivity extends AppCompatActivity {
         });
 
         // Set default selected tab to Workouts
-        bottomNavigationView.setSelectedItemId(R.id.nav_workouts);
+        //bottomNavigationView.setSelectedItemId(R.id.nav_workouts);
     }
 }

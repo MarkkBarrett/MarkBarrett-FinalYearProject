@@ -80,7 +80,7 @@ router.get('/recommendation', async (req, res) => {
         if (!plan) {
             return res.status(404).json({ success: false, message: 'No matching plan found' });
         }
-
+        console.log("PLAN JSON", JSON.stringify(plan));
         res.json({ success: true, data: plan });
     } catch (err) {
         console.error('Recommendation error:', err.message);

@@ -33,7 +33,7 @@ public class DashboardActivity extends AppCompatActivity {
             if (id == R.id.nav_dashboard) {
                 return true; // Stay on the dashboard
             } else if (id == R.id.nav_workouts) {
-                startActivity(new Intent(this, StartWorkoutActivity.class));
+                startActivity(new Intent(this, ChooseWorkoutActivity.class));
                 return true;
             } else if (id == R.id.nav_form) {
                 startActivity(new Intent(this, FormCheckerActivity.class));

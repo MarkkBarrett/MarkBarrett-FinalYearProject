@@ -122,7 +122,7 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(this, DashboardActivity.class));
                 return true;
             } else if (id == R.id.nav_workouts) {
-                startActivity(new Intent(this, StartWorkoutActivity.class));
+                startActivity(new Intent(this, ChooseWorkoutActivity.class));
                 return true;
             } else if (id == R.id.nav_form) {
                 startActivity(new Intent(this, FormCheckerActivity.class));

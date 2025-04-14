@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:padding="10dp">
+
+        <!-- "Recommended" label if needed -->
+        <TextView
+            android:id="@+id/recommended_label_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recommended"
+            android:padding="4dp"
+            android:textSize="12sp"
+            android:textColor="@color/black"
+            android:background="@drawable/recommend_label"
+            android:visibility="gone" />
+
+        <!-- Main content layout -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/recommended_label_tv"
+            android:orientation="vertical"
+            android:paddingTop="8dp">
+
+            <!-- Plan Name -->
+            <TextView
+                android:id="@+id/plan_name_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Beginner Hypertrophy"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/green" />
+
+            <!-- Plan Description -->
+            <TextView
+                android:id="@+id/plan_description_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A 3-day full body program designed to build muscle."
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:paddingTop="4dp" />
+
+            <!-- Focus tags (comma separated) -->
+            <TextView
+                android:id="@+id/plan_focus_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Focus: Build Muscle, General Fitness"
+                android:textSize="14sp"
+                android:textColor="@color/gray"
+                android:paddingTop="4dp" />
+
+            <!-- Choose button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:paddingTop="8dp">
+
+                <Button
+                    android:id="@+id/choose_plan_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose Plan"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/green"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

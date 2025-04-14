@@ -30,6 +30,7 @@
         <activity android:name=".auth.QuestionnaireActivity" />
         <activity android:name=".ui.ProfileActivity" />
         <activity android:name=".ui.ChangePasswordActivity" />
+        <activity android:name=".ui.ChooseWorkoutActivity" />
         <activity android:name=".ui.StartWorkoutActivity" />
         <activity android:name=".ui.NutritionHomeActivity" />
         <activity android:name=".ui.FormCheckerActivity">

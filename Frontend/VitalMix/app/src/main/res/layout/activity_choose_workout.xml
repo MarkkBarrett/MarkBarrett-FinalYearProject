@@ -1,6 +1,113 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/choose_workout_main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ui.ChooseWorkoutActivity"
+    android:background="@color/lightgreen">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/border">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/workout_hub_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Workout Hub"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/green"
+                android:layout_marginTop="10dp" />
+
+            <!-- 2x2 Quick Action Buttons -->
+            <GridLayout
+                android:id="@+id/workout_button_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/workout_hub_title"
+                android:layout_marginTop="20dp"
+                android:columnCount="2"
+                android:rowCount="2"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="true">
+
+                <Button
+                    android:id="@+id/start_workout_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Start Workout"
+                    android:backgroundTint="@color/green"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/create_plan_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Create a Plan"
+                    android:backgroundTint="@color/green"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/view_progress_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="View Progress"
+                    android:backgroundTint="@color/green"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/workout_history_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Workout History"
+                    android:backgroundTint="@color/green"
+                    android:textColor="@color/white" />
+            </GridLayout>
+
+            <!-- Section Header -->
+            <TextView
+                android:id="@+id/workout_plans_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/workout_button_grid"
+                android:layout_marginTop="30dp"
+                android:text="Workout Plans"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textColor="@color/green" />
+
+            <!-- RecyclerView for Plans -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/workout_plans_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/workout_plans_header"
+                android:layout_marginTop="10dp" />
+        </RelativeLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav"
+        app:labelVisibilityMode="labeled"
+        android:background="@color/lightgreen" />
+</RelativeLayout>
