@@ -3,6 +3,7 @@ package com.example.vitalmix.api;
 import com.example.vitalmix.models.ChangePassword;
 import com.example.vitalmix.models.User;
 import com.example.vitalmix.models.WorkoutSession;
+import com.google.gson.JsonObject;
 
 import java.util.List;
 
@@ -61,6 +62,10 @@ public interface ApiService {
     // Get recommended workout plan for a user
     @GET("/api/workout/recommendation")
     Call<ApiResponse> getRecommendedPlan(@Query("userId") String userId);
+
+    // Select a workout plan and assign to user
+    @POST("/api/workout/choosePlan")
+    Call<ApiResponse> chooseWorkoutPlan(@Body JsonObject requestBody);
 
     @Multipart
     @POST("/predict-form/")

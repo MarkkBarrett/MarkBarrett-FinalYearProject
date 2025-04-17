@@ -80,7 +80,6 @@ router.get('/recommendation', async (req, res) => {
         if (!plan) {
             return res.status(404).json({ success: false, message: 'No matching plan found' });
         }
-        console.log("PLAN JSON", JSON.stringify(plan));
         res.json({ success: true, data: plan });
     } catch (err) {
         console.error('Recommendation error:', err.message);
@@ -88,6 +87,52 @@ router.get('/recommendation', async (req, res) => {
     }
 });
 
+/**
+ * @route POST /api/workout/choosePlan
+ * @desc Assign a chosen default workout plan to a user
+ * @access Public
+ */
+
+router.post('/choosePlan', async (req, res) => {
+    const { userId, chosenPlanId } = req.body;
+
+    // Validate inputs
+    if (!userId || !chosenPlanId) {
+        return res.status(400).json({ success: false, message: 'userId and chosenPlanId are required' });
+    }
+
+    try {
+        // Remove existing workout plan for this user, if any
+        await WorkoutPlan.deleteOne({ userId });
+
+        // Find the default plan the user selected
+        const defaultPlan = await DefaultWorkoutPlan.findById(chosenPlanId);
+
+        // Check if the selected default plan exists
+        if (!defaultPlan) {
+            return res.status(404).json({ success: false, message: 'Selected workout plan not found' });
+        }
+
+        // Clone default plan into a user WorkoutPlan
+        const newPlan = new WorkoutPlan({
+            userId,
+            planName: defaultPlan.planName,
+            description: defaultPlan.description,
+            focus: defaultPlan.focus,
+            workouts: defaultPlan.workouts,
+            currentDayIndex: 0 // Always starts from day 0
+        });
+
+        // Save new plan
+        await newPlan.save();
+
+        // Send back success response
+        res.json({ success: true, message: 'Workout plan assigned successfully', data: newPlan });
+    } catch (err) {
+        console.error('Error assigning workout plan:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
 
 // Export the router
 module.exports = router;

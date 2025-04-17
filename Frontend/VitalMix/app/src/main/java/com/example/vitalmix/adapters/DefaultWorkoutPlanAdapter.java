@@ -1,6 +1,8 @@
 package com.example.vitalmix.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +14,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.vitalmix.R;
+import com.example.vitalmix.api.ApiClient;
+import com.example.vitalmix.api.ApiResponse;
+import com.example.vitalmix.auth.SessionManager;
 import com.example.vitalmix.models.DefaultWorkoutPlan;
+import com.example.vitalmix.ui.StartWorkoutActivity;
+import com.google.gson.JsonObject;
 
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DefaultWorkoutPlanAdapter extends RecyclerView.Adapter<DefaultWorkoutPlanAdapter.PlanViewHolder> {
 
@@ -63,7 +74,35 @@ public class DefaultWorkoutPlanAdapter extends RecyclerView.Adapter<DefaultWorko
         // Handle choose button click
         holder.choosePlanBtn.setOnClickListener(v -> {
             Toast.makeText(context, "Chosen: " + plan.getPlanName(), Toast.LENGTH_SHORT).show();
-            // TODO: Add logic to assign plan to user
+
+            // Prep request body
+            JsonObject requestBody = new JsonObject();
+            requestBody.addProperty("userId", SessionManager.getLoggedInUserID(context));
+            requestBody.addProperty("chosenPlanId", plan.getId());
+            Log.d("workout_debug", "Request JSON: " + requestBody.toString());
+
+            // Call the backend to assign the chosen plan
+            ApiClient.getApiService().chooseWorkoutPlan(requestBody).enqueue(new Callback<ApiResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                    Log.d("workout_debug", "Response raw body: " + ApiClient.getGson().toJson(response.body()));
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        // Show success message
+                        Toast.makeText(context, "Plan assigned successfully!", Toast.LENGTH_SHORT).show();
+
+                        // Navigate to StartWorkoutActivity
+                        Intent intent = new Intent(context, StartWorkoutActivity.class);
+                        context.startActivity(intent);
+                    } else {
+                        Toast.makeText(context, "Failed to assign plan", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
+                    Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 
