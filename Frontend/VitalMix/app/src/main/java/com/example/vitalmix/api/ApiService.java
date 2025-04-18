@@ -67,6 +67,10 @@ public interface ApiService {
     @POST("/api/workout/choosePlan")
     Call<ApiResponse> chooseWorkoutPlan(@Body JsonObject requestBody);
 
+    // Update Profile info
+    @PUT("/api/profile/update")
+    Call<ApiResponse> updateProfile(@Body JsonObject updateBody);
+
     @Multipart
     @POST("/predict-form/")
     Call<ApiResponseFastAPI> uploadFormCheck(@Part MultipartBody.Part file, @Part("exercise") RequestBody exercise);

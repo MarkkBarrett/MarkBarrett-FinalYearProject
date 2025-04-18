@@ -3,8 +3,12 @@ package com.example.vitalmix.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
+import androidx.core.content.ContextCompat;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,7 +28,9 @@ import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private TextView nameTv, emailTv, heightTv, weightTv, ageTv;
+    private TextView nameTv, emailTv;
+    private EditText heightTv, weightTv, ageTv;
+    private Button updateProfileBtn, saveChangesBtn;
     private SessionManager sessionManager;
     private ApiService apiService;
 
@@ -39,6 +45,8 @@ public class ProfileActivity extends AppCompatActivity {
         heightTv = findViewById(R.id.height_tv);
         weightTv = findViewById(R.id.weight_tv);
         ageTv = findViewById(R.id.age_tv);
+        updateProfileBtn = findViewById(R.id.update_profile_btn);
+        saveChangesBtn = findViewById(R.id.save_changes_btn);
 
         // Initialize API service
         apiService = ApiClient.getApiService();
@@ -50,6 +58,8 @@ public class ProfileActivity extends AppCompatActivity {
         setupBottomNavigation();
 
         // Handle buttons
+        updateProfile();
+        saveChanges();
         changePassword();
         logout();
     }
@@ -89,6 +99,98 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, "API Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("ProfileAPI", "API failure: ", t);
             }
+        });
+    }
+
+    // Handle Update profile button, makes ET's editable and shows Save button
+    private void updateProfile() {
+        updateProfileBtn.setOnClickListener(v -> {
+            // Enable fields
+            ageTv.setEnabled(true);
+            heightTv.setEnabled(true);
+            weightTv.setEnabled(true);
+
+            // Set visual style for editable fields
+            int black = ContextCompat.getColor(this, R.color.black);
+
+            ageTv.setBackgroundResource(R.drawable.border);
+            heightTv.setBackgroundResource(R.drawable.border);
+            weightTv.setBackgroundResource(R.drawable.border);
+
+            ageTv.setTextColor(black);
+            heightTv.setTextColor(black);
+            weightTv.setTextColor(black);
+
+            heightTv.setText(heightTv.getText().toString().replace(" cm", ""));
+            weightTv.setText(weightTv.getText().toString().replace(" kg", ""));
+
+            // Show Save button
+            saveChangesBtn.setVisibility(View.VISIBLE);
+        });
+    }
+
+    // Handles sending updated values to backend
+    private void saveChanges() {
+        saveChangesBtn.setOnClickListener(v -> {
+            String userId = SessionManager.getLoggedInUserID(this);
+
+            // Validate and parse inputs
+            String ageStr = ageTv.getText().toString().trim();
+            String heightStr = heightTv.getText().toString().trim();
+            String weightStr = weightTv.getText().toString().trim();
+
+            if (ageStr.isEmpty() || heightStr.isEmpty() || weightStr.isEmpty()) {
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int age = Integer.parseInt(ageStr);
+            int height = Integer.parseInt(heightStr);
+            int weight = Integer.parseInt(weightStr);
+
+            JsonObject request = new JsonObject();
+            request.addProperty("_id", userId);
+            request.addProperty("age", age);
+            request.addProperty("height", height);
+            request.addProperty("weight", weight);
+
+            apiService.updateProfile(request).enqueue(new Callback<ApiResponse>() {
+                @Override
+                public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Toast.makeText(ProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                        saveChangesBtn.setVisibility(View.GONE);
+
+                        // Disable fields again
+                        ageTv.setEnabled(false);
+                        heightTv.setEnabled(false);
+                        weightTv.setEnabled(false);
+
+                        int green = ContextCompat.getColor(ProfileActivity.this, R.color.green);
+                        int white = ContextCompat.getColor(ProfileActivity.this, R.color.white);
+
+                        ageTv.setBackgroundColor(green);
+                        heightTv.setBackgroundColor(green);
+                        weightTv.setBackgroundColor(green);
+
+                        ageTv.setTextColor(white);
+                        heightTv.setTextColor(white);
+                        weightTv.setTextColor(white);
+
+                        heightTv.setText(height + " cm");
+                        weightTv.setText(weight + " kg");
+                    } else {
+                        String msg = (response.body() != null) ? response.body().getMessage() : "Update failed";
+                        Toast.makeText(ProfileActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse> call, Throwable t) {
+                    Toast.makeText(ProfileActivity.this, "API Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("ProfileUpdate", "API call failed", t);
+                }
+            });
         });
     }
 

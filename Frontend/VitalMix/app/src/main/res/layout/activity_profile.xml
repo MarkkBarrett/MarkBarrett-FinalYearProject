@@ -129,13 +129,17 @@
                             android:text="Height:"
                             android:textColor="@color/white" />
 
-                        <TextView
+                        <EditText
                             android:id="@+id/height_tv"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="180 cm"
-                            android:textColor="@color/white" />
+                            android:inputType="number"
+                            android:enabled="false"
+                            android:background="@color/green"
+                            android:textColor="@color/white"
+                            android:padding="4dp" />
+
                     </LinearLayout>
 
                     <!-- Weight -->
@@ -153,13 +157,17 @@
                             android:text="Weight:"
                             android:textColor="@color/white" />
 
-                        <TextView
+                        <EditText
                             android:id="@+id/weight_tv"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="75 kg"
-                            android:textColor="@color/white" />
+                            android:inputType="number"
+                            android:enabled="false"
+                            android:background="@color/green"
+                            android:textColor="@color/white"
+                            android:padding="4dp" />
+
                     </LinearLayout>
 
                     <!-- Age -->
@@ -177,23 +185,36 @@
                             android:text="Age:"
                             android:textColor="@color/white" />
 
-                        <TextView
+                        <EditText
                             android:id="@+id/age_tv"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="25"
-                            android:textColor="@color/white" />
+                            android:inputType="number"
+                            android:enabled="false"
+                            android:background="@color/green"
+                            android:textColor="@color/white"
+                            android:padding="4dp" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <Button
+                android:id="@+id/save_changes_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save Changes"
+                android:layout_below="@id/profile_details_card"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"
+                android:backgroundTint="@color/green" />
 
             <!-- Buttons Layout -->
             <LinearLayout
                 android:id="@+id/button_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_details_card"
+                android:layout_below="@id/save_changes_btn"
                 android:layout_marginTop="10dp"
                 android:orientation="vertical">
 

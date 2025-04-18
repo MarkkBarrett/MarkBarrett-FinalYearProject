@@ -91,4 +91,42 @@ router.put('/changePassword', async (req, res) => {
     }
 });
 
+/**
+ * @route PUT /api/profile/update
+ * @desc Update user's age, height, and weight
+ * @access Public
+ */
+router.put('/update', async (req, res) => {
+    const { _id, age, height, weight } = req.body;
+
+    // Check ids are not null
+    if (!_id || age == null || height == null || weight == null) {
+        return res.status(400).json({ success: false, message: 'All fields are required' });
+    }
+
+    try {
+        const user = await User.findById(_id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Update questionnaire data
+        user.questionnaire = {
+            ...user.questionnaire,
+            age,
+            height,
+            weight
+        };
+
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Profile updated successfully' });
+
+    } catch (error) {
+        console.error('Error updating profile:', error.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+
 module.exports = router;
