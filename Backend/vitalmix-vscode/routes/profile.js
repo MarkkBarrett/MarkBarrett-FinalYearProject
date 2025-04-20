@@ -128,5 +128,41 @@ router.put('/update', async (req, res) => {
     }
 });
 
+/**
+ * @route DELETE /api/profile/delete
+ * @desc Delete user's account and all associated data
+ * @access Public
+ */
+router.delete('/delete', async (req, res) => {
+    const { userId } = req.query; // Get userId from query string
+
+    // Validate input
+    if (!userId) {
+        return res.status(400).json({ success: false, message: 'User ID is required' });
+    }
+
+    try {
+        // Delete the user account
+        const deletedUser = await User.findByIdAndDelete(userId);
+        if (!deletedUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Delete associated workout plan (if any)
+        const WorkoutPlan = require('../models/WorkoutPlan');
+        await WorkoutPlan.deleteOne({ userId });
+
+        // Delete associated workout sessions (if any)
+        const WorkoutSession = require('../models/WorkoutSession');
+        await WorkoutSession.deleteMany({ userId });
+
+        // Response
+        res.status(200).json({ success: true, message: 'Account and all associated data deleted successfully' });
+
+    } catch (err) {
+        console.error('Error deleting account:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
 
 module.exports = router;
