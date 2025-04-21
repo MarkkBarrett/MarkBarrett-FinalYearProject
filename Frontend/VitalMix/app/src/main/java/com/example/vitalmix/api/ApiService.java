@@ -15,6 +15,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.DELETE;
 import retrofit2.http.Part;
 import retrofit2.http.Query;
 
@@ -70,6 +71,10 @@ public interface ApiService {
     // Update Profile info
     @PUT("/api/profile/update")
     Call<ApiResponse> updateProfile(@Body JsonObject updateBody);
+
+    // Delete user and all assosciated data
+    @DELETE("/api/profile/delete")
+    Call<ApiResponse> deleteAccount(@Query("userId") String userId);
 
     @Multipart
     @POST("/predict-form/")

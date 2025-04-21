@@ -30,7 +30,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private TextView nameTv, emailTv;
     private EditText heightTv, weightTv, ageTv;
-    private Button updateProfileBtn, saveChangesBtn;
+    private Button updateProfileBtn, saveChangesBtn, deleteAccountBtn;
     private SessionManager sessionManager;
     private ApiService apiService;
 
@@ -47,6 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
         ageTv = findViewById(R.id.age_tv);
         updateProfileBtn = findViewById(R.id.update_profile_btn);
         saveChangesBtn = findViewById(R.id.save_changes_btn);
+        deleteAccountBtn = findViewById(R.id.delete_account_btn);
 
         // Initialize API service
         apiService = ApiClient.getApiService();
@@ -62,6 +63,7 @@ public class ProfileActivity extends AppCompatActivity {
         saveChanges();
         changePassword();
         logout();
+        deleteAccount();
     }
 
     // Fetch user profile data from backend
@@ -211,6 +213,44 @@ public class ProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+        });
+    }
+
+    // Handles Delete Account button with confirmation dialog
+    private void deleteAccount() {
+        deleteAccountBtn.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Are you sure you want to delete this account?")
+                    .setMessage("This will permanently delete your account and all associated data. Do you want to continue?")
+                    .setPositiveButton("Yes, delete", (dialog, which) -> {
+                        String userId = SessionManager.getLoggedInUserID(this);
+
+                        apiService.deleteAccount(userId).enqueue(new Callback<ApiResponse>() {
+                            @Override
+                            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                                    Toast.makeText(ProfileActivity.this, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+
+                                    // Clear session and return to login
+                                    SessionManager.clearSession(ProfileActivity.this);
+                                    Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                } else {
+                                    String msg = (response.body() != null) ? response.body().getMessage() : "Deletion failed";
+                                    Toast.makeText(ProfileActivity.this, msg, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                                Toast.makeText(ProfileActivity.this, "API Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e("AccountDelete", "API call failed", t);
+                            }
+                        });
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
     }
 
