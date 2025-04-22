@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose'); //remove and test... unnused 
 const WorkoutPlan = require('../models/WorkoutPlan');
 const DefaultWorkoutPlan = require('../models/DefaultWorkoutPlan');
+const WorkoutSession = require('../models/WorkoutSession');
 const User = require('../models/User');
 const router = express.Router();
 
@@ -130,6 +131,35 @@ router.post('/choosePlan', async (req, res) => {
         res.json({ success: true, message: 'Workout plan assigned successfully', data: newPlan });
     } catch (err) {
         console.error('Error assigning workout plan:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+/**
+ * @route GET /api/workout/lastSessionByName
+ * @desc Fetch the latest workout session by workout name for a user
+ * @access Public
+ */
+router.get('/lastSessionByName', async (req, res) => {
+    const { userId, workoutName } = req.query;
+
+    // Validate input
+    if (!userId || !workoutName) {
+        return res.status(400).json({ success: false, message: 'Missing userId or workoutName' });
+    }
+
+    try {
+        // Find latest session with the same workout name
+        const lastSession = await WorkoutSession.findOne({ userId, workoutName })
+            .sort({ sessionDate: -1 }); // Sort by date descending to get the latest
+
+        if (!lastSession) {
+            return res.status(404).json({ success: false, message: 'No matching session found' });
+        }
+
+        res.json({ success: true, data: lastSession });
+    } catch (err) {
+        console.error('Error fetching last session', err.message);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
