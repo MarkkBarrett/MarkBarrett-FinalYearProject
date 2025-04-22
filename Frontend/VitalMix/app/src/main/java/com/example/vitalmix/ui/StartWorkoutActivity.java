@@ -26,8 +26,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,6 +42,7 @@ public class StartWorkoutActivity extends AppCompatActivity {
     private ApiService apiService;
     private String userId; // = "6790a6c0b1ddfc94b8165b7f"; // Hardcoded for testing
     private WorkoutPlan workoutPlan;
+    private Map<String, WorkoutExerciseLog> previousLogs = new HashMap<>(); //For autofilling sets reps etc.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +103,35 @@ public class StartWorkoutActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchLastWorkoutSessionLogs(String workoutName, List<String> exerciseIds) {
+        apiService.getLastSessionByWorkoutName(userId, workoutName).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    WorkoutSession lastSession = ApiClient.getGson().fromJson(
+                            ApiClient.getGson().toJson(response.body().getData()),
+                            WorkoutSession.class
+                    );
+
+                    for (WorkoutExerciseLog log : lastSession.getExerciseLogs()) {
+                        previousLogs.put(log.getExerciseId(), log);
+                    }
+                    // Now fetch full details
+                    fetchExerciseDetails(exerciseIds);
+                } else {
+                    Log.w("workout_debug", "No previous session found or failed. Proceeding without logs.");
+                    fetchExerciseDetails(exerciseIds); // Proceed without autofilling data
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
+                Log.e("workout_debug", "Failed to fetch last session logs: " + t.getMessage());
+                fetchExerciseDetails(exerciseIds); // Still allow progress
+            }
+        });
+    }
+
     //Displays the current workout based on `currentDayIndex`
     private void displayWorkout() {
         if (workoutPlan == null || workoutPlan.getWorkouts().isEmpty()) {
@@ -109,13 +141,14 @@ public class StartWorkoutActivity extends AppCompatActivity {
 
         int currentDay = workoutPlan.getCurrentDayIndex();
         List<String> exerciseIds = workoutPlan.getWorkouts().get(currentDay).getExercises();
+        String workoutName = workoutPlan.getWorkouts().get(currentDay).getWorkoutName();
 
         // Log retrieved exercise IDs for debugging
         Log.d("DEBUG", "Current workout day: " + currentDay);
         Log.d("DEBUG", "Exercise IDs: " + exerciseIds.toString());
 
         // Fetch full exercise details using IDs
-        fetchExerciseDetails(exerciseIds);
+        fetchLastWorkoutSessionLogs(workoutName, exerciseIds);
     }
 
     // Fetches detailed exercise data from API based on exercise IDs
@@ -139,7 +172,7 @@ public class StartWorkoutActivity extends AppCompatActivity {
                     }
 
                     // Attach exercises to adapter
-                    exerciseAdapter = new ExerciseAdapter(StartWorkoutActivity.this, exercises);
+                    exerciseAdapter = new ExerciseAdapter(StartWorkoutActivity.this, exercises, previousLogs);
                     exerciseRecyclerView.setAdapter(exerciseAdapter);
                 } else {
                     Log.e("API_ERROR", "Failed to fetch exercises");

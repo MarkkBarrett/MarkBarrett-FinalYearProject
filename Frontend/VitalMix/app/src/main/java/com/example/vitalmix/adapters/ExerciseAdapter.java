@@ -20,17 +20,20 @@ import com.example.vitalmix.models.WorkoutExerciseLog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.ExerciseViewHolder> {
     private final List<Exercise> exercises; // List of exercises
     private final Context context;
     private static final int DEFAULT_SETS = 4; // Hardcoded default sets
     private RecyclerView recyclerView;
+    private final Map<String, WorkoutExerciseLog> previousExerciseLogs;
 
     // Constructor
-    public ExerciseAdapter(Context context, List<Exercise> exercises) {
+    public ExerciseAdapter(Context context, List<Exercise> exercises, Map<String, WorkoutExerciseLog> previousExerciseLogs) {
         this.context = context;
         this.exercises = exercises;
+        this.previousExerciseLogs = previousExerciseLogs;
     }
 
     @Override
@@ -58,6 +61,9 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
         holder.setRepsInputs.clear();
         holder.setWeightInputs.clear();
 
+        // Get previous log if available
+        WorkoutExerciseLog previousLog = previousExerciseLogs != null ? previousExerciseLogs.get(exercise.getId()) : null;
+
         // Dynamically add set rows
         for (int i = 0; i < DEFAULT_SETS; i++) {
             View setRow = LayoutInflater.from(context).inflate(R.layout.row_set, holder.setsRepsLayout, false);
@@ -69,6 +75,13 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
 
             // Label the set number
             setNumber.setText("Set " + (i + 1));
+
+            // Pre-fill if data from previous workout exists
+            if (previousLog != null && i < previousLog.getSets().size()) {
+                SetLog set = previousLog.getSets().get(i);
+                repsInput.setText(String.valueOf(set.getReps()));
+                weightInput.setText(String.valueOf(set.getWeight()));
+            }
 
             // Store references for later retrieval
             holder.setRepsInputs.add(repsInput);

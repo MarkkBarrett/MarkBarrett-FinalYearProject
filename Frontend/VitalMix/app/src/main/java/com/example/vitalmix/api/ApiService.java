@@ -76,6 +76,10 @@ public interface ApiService {
     @DELETE("/api/profile/delete")
     Call<ApiResponse> deleteAccount(@Query("userId") String userId);
 
+    // Get last workout session for a given workout name
+    @GET("/api/workout/lastSessionByName")
+    Call<ApiResponse> getLastSessionByWorkoutName(@Query("userId") String userId, @Query("workoutName") String workoutName);
+
     @Multipart
     @POST("/predict-form/")
     Call<ApiResponseFastAPI> uploadFormCheck(@Part MultipartBody.Part file, @Part("exercise") RequestBody exercise);
