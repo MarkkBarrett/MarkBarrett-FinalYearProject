@@ -220,6 +220,19 @@ public class StartWorkoutActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Log.d("DEBUG", "Workout session saved successfully!");
 
+                    // Show success dialog
+                    new AlertDialog.Builder(StartWorkoutActivity.this)
+                            .setTitle("Workout Complete!")
+                            .setMessage("Great job finishing your workout today!")
+                            .setPositiveButton("Back to Workout Hub", (dialog, which) -> {
+                                Intent intent = new Intent(StartWorkoutActivity.this, ChooseWorkoutActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+                            })
+                            .setCancelable(false)
+                            .show();
+
                     // Get the next workout day from response
                     int nextDayIndex = response.body().getNextDayIndex();
                     workoutPlan.setCurrentDayIndex(nextDayIndex);
