@@ -164,5 +164,34 @@ router.get('/lastSessionByName', async (req, res) => {
     }
 });
 
+/**
+ * @route GET /api/workout/history
+ * @desc Fetch all workout sessions for a user
+ * @access Public
+ */
+router.get('/history', async (req, res) => {
+    const { userId } = req.query;
+
+    // Validate input
+    if (!userId) {
+        return res.status(400).json({ success: false, message: 'Missing userId' });
+    }
+
+    try {
+        // Find all workout sessions for the user, sorted by most recent first
+        const sessions = await WorkoutSession.find({ userId }).sort({ sessionDate: -1 });
+
+        if (!sessions || sessions.length === 0) {
+            return res.status(404).json({ success: false, message: 'No workout sessions found' });
+        }
+
+        // Return all sessions
+        res.json({ success: true, data: sessions });
+    } catch (err) {
+        console.error('Error fetching workout history', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
 // Export the router
 module.exports = router;
