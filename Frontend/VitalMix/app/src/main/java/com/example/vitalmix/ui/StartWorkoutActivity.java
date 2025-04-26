@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -84,6 +85,12 @@ public class StartWorkoutActivity extends AppCompatActivity {
                     workoutPlan = ApiClient.getGson().fromJson(
                             ApiClient.getGson().toJson(response.body().getData()), WorkoutPlan.class
                     );
+
+                    // Set workout title on screen
+                    TextView titleTv = findViewById(R.id.title_tv);
+                    int currentDay = workoutPlan.getCurrentDayIndex();
+                    titleTv.setText(workoutPlan.getWorkouts().get(currentDay).getWorkoutName());
+
 
                     Log.d("DEBUG", "Workout plan details: " + workoutPlan.getPlanName());
 

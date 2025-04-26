@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightgreen"
-    tools:context=".ui.StartWorkoutActivity">
+    tools:context=".ui.ViewWorkoutHistoryActivity">
 
     <!-- Main Scrollable Content -->
     <ScrollView
@@ -24,10 +24,10 @@
 
             <!-- Title -->
             <TextView
-                android:id="@+id/title_tv"
+                android:id="@+id/history_title_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No workout plan selected!"
+                android:text="Name's Workout History"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@color/green"
                 android:layout_marginTop="20dp"
@@ -36,26 +36,15 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:textAlignment="center"/>
 
-            <!-- Recycler View for Exercises -->
+            <!-- Recycler View for Workout Sessions -->
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/exercise_recycler_view"
+                android:id="@+id/workout_history_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/title_tv"
+                android:layout_below="@id/history_title_tv"
                 android:layout_marginTop="15dp"
                 android:clipToPadding="false"
                 android:scrollbars="vertical" />
-
-            <!-- Finish Workout Button -->
-            <Button
-                android:id="@+id/finish_workout_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Finish Workout"
-                android:layout_below="@id/exercise_recycler_view"
-                android:layout_marginTop="20dp"
-                android:backgroundTint="@color/green"
-                android:textColor="@color/white" />
         </RelativeLayout>
     </ScrollView>
 

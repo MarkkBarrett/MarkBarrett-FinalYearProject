@@ -139,7 +139,7 @@ public class ChooseWorkoutActivity extends AppCompatActivity {
                 Toast.makeText(this, "View Progress coming soon", Toast.LENGTH_SHORT).show());
 
         findViewById(R.id.workout_history_btn).setOnClickListener(v ->
-                Toast.makeText(this, "Workout History coming soon", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, ViewWorkoutHistoryActivity.class)));
     }
 
     // Handles tab switching on the bottom navigation bar

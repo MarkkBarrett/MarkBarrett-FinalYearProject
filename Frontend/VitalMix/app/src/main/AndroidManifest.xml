@@ -32,6 +32,7 @@
         <activity android:name=".ui.ChangePasswordActivity" />
         <activity android:name=".ui.ChooseWorkoutActivity" />
         <activity android:name=".ui.StartWorkoutActivity" />
+        <activity android:name=".ui.ViewWorkoutHistoryActivity" />
         <activity android:name=".ui.NutritionHomeActivity" />
         <activity android:name=".ui.FormCheckerActivity">
         <!--android:exported="true">

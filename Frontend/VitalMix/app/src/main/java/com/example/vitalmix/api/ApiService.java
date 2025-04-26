@@ -80,6 +80,10 @@ public interface ApiService {
     @GET("/api/workout/lastSessionByName")
     Call<ApiResponse> getLastSessionByWorkoutName(@Query("userId") String userId, @Query("workoutName") String workoutName);
 
+    // Get all workout sessions for a user
+    @GET("/api/workout/history")
+    Call<ApiResponse> getWorkoutHistory(@Query("userId") String userId);
+
     @Multipart
     @POST("/predict-form/")
     Call<ApiResponseFastAPI> uploadFormCheck(@Part MultipartBody.Part file, @Part("exercise") RequestBody exercise);

@@ -2,6 +2,7 @@ package com.example.vitalmix.api;
 
 import com.example.vitalmix.models.DefaultWorkoutPlan;
 import com.example.vitalmix.models.Exercise;
+import com.example.vitalmix.models.WorkoutSession;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -48,4 +49,10 @@ public class ApiClient {
     public static Type getDefaultWorkoutPlanListType() {
         return new TypeToken<List<DefaultWorkoutPlan>>() {}.getType();
     }
+
+    // Returns TypeToken for List<WorkoutSession> conversion
+    public static Type getWorkoutSessionListType() {
+        return new TypeToken<List<WorkoutSession>>() {}.getType();
+    }
+
 }
