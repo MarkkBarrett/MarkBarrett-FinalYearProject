@@ -5,6 +5,14 @@ import numpy as np
 import cv2
 import mediapipe as mp
 import os
+from pymongo import MongoClient
+from datetime import datetime
+
+# MongoDB Setup
+MONGO_URI = "mongodb://localhost:27017"  # or your Atlas connection string
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client["VitalMix"]  # Database 
+form_results_collection = db["formResults"]  # Collection name
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -145,6 +153,7 @@ def predict_form(video_path, exercise_name):
     feedback = "Excellent form!" if accuracy >= 90 else "Needs improvement."
     return {"exercise": exercise_name, "accuracy": accuracy, "feedback": feedback}
 
+
 # Generate a processed video with keypoint overlay and labeled points
 def process_and_overlay_video(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
@@ -191,7 +200,7 @@ def process_and_overlay_video(input_path, output_path):
 
 # Main endpoint
 @app.post("/predict-form/")
-async def predict_form_api(file: UploadFile = File(...), exercise: str = Form(...)):
+async def predict_form_api(file: UploadFile = File(...), exercise: str = Form(...), userId: str = Form(...)):
     filename = file.filename
     input_path = os.path.join(VIDEO_SAVE_DIR, filename).replace("\\", "/")
     output_path = input_path.replace(".mp4", "_processed.mp4")
@@ -202,6 +211,15 @@ async def predict_form_api(file: UploadFile = File(...), exercise: str = Form(..
     print(f"Video uploaded at: {input_path}")
 
     prediction = predict_form(input_path, exercise)
+
+    # --- Save prediction to MongoDB ---
+    form_results_collection.insert_one({
+    "userId": userId,
+    "exercise": exercise,
+    "accuracy": prediction["accuracy"],
+    "feedback": [prediction["feedback"]],  # list for new feedback
+    "timestamp": datetime.utcnow()
+    })
 
     # Generate processed video with keypoints
     success = process_and_overlay_video(input_path, output_path)

@@ -86,5 +86,5 @@ public interface ApiService {
 
     @Multipart
     @POST("/predict-form/")
-    Call<ApiResponseFastAPI> uploadFormCheck(@Part MultipartBody.Part file, @Part("exercise") RequestBody exercise);
+    Call<ApiResponseFastAPI> uploadFormCheck(@Part MultipartBody.Part file, @Part("exercise") RequestBody exercise, @Part("userId") RequestBody userId);
 }

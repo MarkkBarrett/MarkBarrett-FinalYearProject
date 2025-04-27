@@ -270,9 +270,6 @@ public class DashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(this, FormCheckerActivity.class));
                 return true;
             }
-            if (id == R.id.nav_nutrition) {
-                return true;
-            }
             if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;

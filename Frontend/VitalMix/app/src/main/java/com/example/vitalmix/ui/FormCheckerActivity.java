@@ -14,6 +14,7 @@ import com.example.vitalmix.R;
 import com.example.vitalmix.api.ApiClientFastAPI;
 import com.example.vitalmix.api.ApiResponseFastAPI;
 import com.example.vitalmix.api.ApiService;
+import com.example.vitalmix.auth.SessionManager;
 import com.example.vitalmix.utils.FileUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
@@ -35,6 +36,7 @@ public class FormCheckerActivity extends AppCompatActivity {
     private Button calculateScoreBtn;
     private VideoView resultVideoView;
     private ApiService apiService;
+    private String userId;
     private ProgressDialog progressDialog;
 
     @Override
@@ -51,6 +53,9 @@ public class FormCheckerActivity extends AppCompatActivity {
         RelativeLayout uploadContainer = findViewById(R.id.upload_container);
         resultVideoView = findViewById(R.id.processed_video_view);
         resultVideoView.setMediaController(new MediaController(this)); // Playback controls
+
+        // Get user ID from session
+        userId = SessionManager.getLoggedInUserID(this);
 
         // Retrofit service
         apiService = ApiClientFastAPI.getApiService();
@@ -96,6 +101,7 @@ public class FormCheckerActivity extends AppCompatActivity {
 
         String selectedExercise = exerciseSpinner.getSelectedItem().toString();
         RequestBody exerciseBody = RequestBody.create(MediaType.parse("text/plain"), selectedExercise);
+        RequestBody userIdBody = RequestBody.create(MediaType.parse("text/plain"), userId);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Sending your " + selectedExercise + " to the Model...");
@@ -107,7 +113,7 @@ public class FormCheckerActivity extends AppCompatActivity {
         new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Analysing your form..."), 28000);
         new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Almost there..."), 36000);
 
-        Call<ApiResponseFastAPI> call = apiService.uploadFormCheck(videoPart, exerciseBody);
+        Call<ApiResponseFastAPI> call = apiService.uploadFormCheck(videoPart, exerciseBody, userIdBody);
         call.enqueue(new Callback<ApiResponseFastAPI>() {
             @Override
             public void onResponse(Call<ApiResponseFastAPI> call, Response<ApiResponseFastAPI> response) {
@@ -169,9 +175,6 @@ public class FormCheckerActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_form) {
                 return true; // Stay on form checker
-            } else if (id == R.id.nav_nutrition) {
-                startActivity(new Intent(this, NutritionHomeActivity.class));
-                return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;

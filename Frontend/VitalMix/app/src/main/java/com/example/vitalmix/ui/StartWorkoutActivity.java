@@ -282,9 +282,6 @@ public class StartWorkoutActivity extends AppCompatActivity {
             } else if (id == R.id.nav_form) {
                 startActivity(new Intent(this, FormCheckerActivity.class));
                 return true;
-            } else if (id == R.id.nav_nutrition) {
-                startActivity(new Intent(this, NutritionHomeActivity.class));
-                return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;
