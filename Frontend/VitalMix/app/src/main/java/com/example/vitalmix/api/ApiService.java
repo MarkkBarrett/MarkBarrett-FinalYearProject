@@ -84,6 +84,10 @@ public interface ApiService {
     @GET("/api/workout/history")
     Call<ApiResponse> getWorkoutHistory(@Query("userId") String userId);
 
+    @GET("/api/formResults")
+    Call<ApiResponse> getFormResults(@Query("userId") String userId, @Query("exercise") String exercise, @Query("limit") int limit
+    );
+
     @Multipart
     @POST("/predict-form/")
     Call<ApiResponseFastAPI> uploadFormCheck(@Part MultipartBody.Part file, @Part("exercise") RequestBody exercise, @Part("userId") RequestBody userId);
