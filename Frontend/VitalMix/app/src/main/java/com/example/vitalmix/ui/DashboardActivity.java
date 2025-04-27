@@ -2,61 +2,283 @@ package com.example.vitalmix.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.example.vitalmix.R;
 import com.example.vitalmix.auth.SessionManager;
+import com.example.vitalmix.api.ApiClient;
+import com.example.vitalmix.api.ApiResponse;
+import com.example.vitalmix.api.ApiService;
+import com.example.vitalmix.models.WorkoutSession;
+import com.example.vitalmix.models.WorkoutExerciseLog;
+import com.example.vitalmix.models.Exercise;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.Gson;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DashboardActivity extends AppCompatActivity {
+
+    private TextView welcomeTv;
+    private TextView lastWorkoutTv;
+    private TextView accuracyTv; // form checker accuracy
+    private PieChart formAccuracyPercent;
+    private CardView lastWorkoutCard;
+    private TextView cardWorkoutName, cardWorkoutDate;
+    private LinearLayout cardExercisesContainer;
+
+    // parse ISO dates from backend
+    private static final SimpleDateFormat isoFormat =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+    // show dates like Apr 26, 2025
+    private static final SimpleDateFormat displayFormat =
+            new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        //set name
+        // bind all views
+        initializeViews();
+
+        // personalise greeting
         updateWelcomeText();
 
-        setupBottomNavigation(); // Initialize the bottom navigation
+        // fetch and display last workout
+        fetchAndDisplayLastWorkout();
+
+        // fetch and display form accuracy
+        fetchAndDisplayFormAccuracy();
+
+        // setup bottom nav
+        setupBottomNavigation();
+
+        // setup charts with sample data
+        setupChart();
+
+        findViewById(R.id.start_workout_btn)
+                .setOnClickListener(v ->
+                        startActivity(new Intent(this, StartWorkoutActivity.class)));
     }
 
+    // bind UI elements to fields
+    private void initializeViews() {
+        welcomeTv = findViewById(R.id.welcome_tv);
+        lastWorkoutTv = findViewById(R.id.last_workout_tv);
+        accuracyTv = findViewById(R.id.accuracy_tv);
+        formAccuracyPercent = findViewById(R.id.form_accuracy_chart);
+        lastWorkoutCard = findViewById(R.id.last_workout_card);
+        cardWorkoutName = findViewById(R.id.card_workout_name);
+        cardWorkoutDate = findViewById(R.id.card_workout_date);
+        cardExercisesContainer = findViewById(R.id.card_exercises_container);
+    }
+
+    // set welcome text using name
     private void updateWelcomeText() {
         String firstName = SessionManager.getLoggedInUserFirstName(this);
         if (firstName != null && !firstName.isEmpty()) {
-            TextView welcomeTv = findViewById(R.id.welcome_tv);
             welcomeTv.setText("Hi, " + firstName + "! Small steps today, big achievements tomorrow!");
         }
     }
 
-    // Method to set up bottom navigation
-    private void setupBottomNavigation() {
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+    // call backend for workout history and show the latest one
+    private void fetchAndDisplayLastWorkout() {
+        String userId = SessionManager.getLoggedInUserID(this);  
+        ApiService api = ApiClient.getApiService();              
+        api.getWorkoutHistory(userId).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call,
+                                   @NonNull Response<ApiResponse> response) {
+                if (response.isSuccessful()
+                        && response.body() != null
+                        && response.body().isSuccess()
+                        && response.body().getData() != null) {
 
-        // Handle navigation item selection
-        bottomNavigationView.setOnItemSelectedListener(item -> {
+                    // parse raw data into List<WorkoutSession>  
+                    List<WorkoutSession> sessions = ApiClient.getGson().fromJson(
+                            ApiClient.getGson().toJson(response.body().getData()),
+                            ApiClient.getWorkoutSessionListType()
+                    );
+
+                    // sort sessions by date  
+                    Collections.sort(sessions, (o1, o2) -> {
+                        try {
+                            Date d1 = isoFormat.parse(o1.getSessionDate());
+                            Date d2 = isoFormat.parse(o2.getSessionDate());
+                            return d1.compareTo(d2);
+                        } catch (ParseException e) {
+                            return 0;
+                        }
+                    });
+
+                    // get the very last session  
+                    final WorkoutSession lastSession = sessions.get(sessions.size() - 1);
+
+                    // format date
+                    String dateStr;
+                    try {
+                        Date d = isoFormat.parse(lastSession.getSessionDate());
+                        dateStr = displayFormat.format(d);
+                    } catch (Exception e) {
+                        dateStr = lastSession.getSessionDate();
+                    }
+                    lastWorkoutTv.setText(lastSession.getWorkoutName() + " on " + dateStr);  
+
+                    // fetch exercise names for that session
+                    List<String> ids = new ArrayList<>();
+                    for (WorkoutExerciseLog log : lastSession.getExerciseLogs()) {
+                        ids.add(log.getExerciseId());
+                    }
+                    ApiClient.getApiService()
+                            .getExercisesByIds(ids)
+                            .enqueue(new Callback<ApiResponse>() {
+                                @Override
+                                public void onResponse(@NonNull Call<ApiResponse> c2,
+                                                       @NonNull Response<ApiResponse> r2) {
+                                    Map<String, String> idToName = new HashMap<>();
+                                    if (r2.isSuccessful()
+                                            && r2.body() != null
+                                            && r2.body().isSuccess()) {
+                                        List<Exercise> exList = ApiClient.getGson().fromJson(
+                                                ApiClient.getGson().toJson(r2.body().getData()),
+                                                ApiClient.getExerciseListType()
+                                        );
+                                        for (Exercise ex : exList) {
+                                            idToName.put(ex.getId(), ex.getName());
+                                        }
+                                    }
+                                    // display card with names
+                                    displayLastWorkoutCard(lastSession, idToName);
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<ApiResponse> c2,
+                                                      @NonNull Throwable t2) {
+                                    // fallback, show IDs if names fail
+                                    displayLastWorkoutCard(lastSession, null);
+                                }
+                            });
+
+                } else {
+                    lastWorkoutTv.setText("No recent workouts");  
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse> call,
+                                  @NonNull Throwable t) {
+                lastWorkoutTv.setText("Error loading workout");  
+            }
+        });
+    }
+
+    // placeholder for form accuracy
+    private void fetchAndDisplayFormAccuracy() {
+        accuracyTv.setText("85%"); 
+    }
+
+    private void setupChart() {
+        // Form Accuracy – PieChart
+        List<PieEntry> pieEntries = new ArrayList<>();
+        pieEntries.add(new PieEntry(85f, "Correct")); // correct %
+        pieEntries.add(new PieEntry(15f, "Improvement")); // remaining %
+        PieDataSet pieDs = new PieDataSet(pieEntries, "");
+        pieDs.setColors(
+                ContextCompat.getColor(this, R.color.green),
+                ContextCompat.getColor(this, R.color.gray)
+        );
+        pieDs.setSliceSpace(2f);
+        formAccuracyPercent.setData(new PieData(pieDs));
+        formAccuracyPercent.setDrawHoleEnabled(false); // full pie
+        formAccuracyPercent.getLegend().setEnabled(false); // hide legend
+        formAccuracyPercent.getDescription().setEnabled(false);
+        formAccuracyPercent.invalidate();
+    }
+
+    // show the card with workout name, date, and each exercise/weight/reps
+    private void displayLastWorkoutCard(WorkoutSession session,
+                                        @Nullable Map<String, String> idToNameMap) {
+        lastWorkoutCard.setVisibility(View.VISIBLE);  
+
+        // name & date  
+        cardWorkoutName.setText(session.getWorkoutName());
+        try {
+            Date d = isoFormat.parse(session.getSessionDate());
+            cardWorkoutDate.setText(displayFormat.format(d));
+        } catch (Exception e) {
+            cardWorkoutDate.setText(session.getSessionDate());
+        }
+
+        // clear old rows  
+        cardExercisesContainer.removeAllViews();
+
+        // for each log, show either the name or Id
+        for (WorkoutExerciseLog log : session.getExerciseLogs()) {
+            String name = (idToNameMap != null && idToNameMap.containsKey(log.getExerciseId()))
+                    ? idToNameMap.get(log.getExerciseId())
+                    : log.getExerciseId();  // fallback
+
+            String text = name
+                    + ": " + String.format(Locale.getDefault(), "%.0f", log.getLastUsedWeight())
+                    + "kg × " + log.getLastUsedReps();
+
+            TextView tv = new TextView(this);
+            tv.setText(text);
+            tv.setTextSize(14f);
+            tv.setPadding(0, 8, 0, 8);
+            cardExercisesContainer.addView(tv);  
+        }
+    }
+
+    // bottom nav
+    private void setupBottomNavigation() {
+        BottomNavigationView nav = findViewById(R.id.bottom_navigation);
+        nav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_dashboard) {
-                return true; // Stay on the dashboard
-            } else if (id == R.id.nav_workouts) {
+            if (id == R.id.nav_dashboard) return true;
+            if (id == R.id.nav_workouts) {
                 startActivity(new Intent(this, ChooseWorkoutActivity.class));
                 return true;
-            } else if (id == R.id.nav_form) {
+            }
+            if (id == R.id.nav_form) {
                 startActivity(new Intent(this, FormCheckerActivity.class));
                 return true;
-            } else if (id == R.id.nav_nutrition) {
-                startActivity(new Intent(this, NutritionHomeActivity.class));
+            }
+            if (id == R.id.nav_nutrition) {
                 return true;
-            } else if (id == R.id.nav_profile) {
+            }
+            if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;
             }
             return false;
         });
-
-        // Set the selected item to dashboard
-        bottomNavigationView.setSelectedItemId(R.id.nav_dashboard);
+        nav.setSelectedItemId(R.id.nav_dashboard);
     }
 }

@@ -7,26 +7,25 @@
     tools:context=".ui.DashboardActivity"
     android:background="@color/lightgreen">
 
-    <!-- Scrollable Content -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_navigation">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="20dp"
             android:layout_margin="20dp"
             android:background="@drawable/border">
 
-            <!-- Welcome Text -->
+            <!-- Welcome -->
             <TextView
                 android:id="@+id/welcome_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:text="Hi, [Name]! Small steps today, big achievements tomorrow!"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"
                 android:textColor="@color/green" />
@@ -40,12 +39,12 @@
                 android:layout_below="@id/welcome_tv"
                 android:layout_marginTop="20dp">
 
-                <!-- Last Workout -->
+                <!-- Last Workout label & value -->
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -63,91 +62,101 @@
                         android:textSize="16sp" />
                 </LinearLayout>
 
-                <!-- Calories Today -->
+                <!-- Form Accuracy label & value -->
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Calories Today:"
+                        android:text="Form Accuracy:"
                         android:textColor="@color/green"
                         android:textSize="18sp" />
 
                     <TextView
-                        android:id="@+id/calories_today_tv"
+                        android:id="@+id/accuracy_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0 kcal"
+                        android:text="0%"
                         android:layout_marginTop="8dp"
                         android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Graph Placeholder -->
-            <ImageView
-                android:id="@+id/graph_placeholder"
+            <!-- Now place the Last-Workout Card *below* the stats -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/last_workout_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/quick_stats_layout"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                android:background="@drawable/border"
+                app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/card_workout_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/green"/>
+
+                <TextView
+                    android:id="@+id/card_workout_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="14sp"/>
+
+                <LinearLayout
+                    android:id="@+id/card_exercises_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+            <!-- Pie Chart only -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Average Form Accuracy"
+                android:textColor="@color/green"
+                android:textSize="18sp"
+                android:layout_marginTop="20dp" />
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/form_accuracy_chart"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_below="@id/quick_stats_layout"
+                android:layout_marginTop="8dp" />
+
+            <!-- Start Workout Button -->
+            <Button
+                android:id="@+id/start_workout_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:src="@drawable/ic_nutrition"
-                android:background="@color/lightgreen" />
+                android:text="Start Workout"
+                android:backgroundTint="@color/green"
+                android:textColor="@color/white" />
 
-            <!-- Quick Actions -->
-            <LinearLayout
-                android:id="@+id/quick_actions_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_below="@id/graph_placeholder"
-                android:layout_marginTop="20dp">
-
-                <Button
-                    android:id="@+id/start_workout_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Start Workout"
-                    android:backgroundTint="@color/green"
-                    android:textColor="@color/white" />
-
-                <Button
-                    android:id="@+id/log_meal_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="10dp"
-                    android:text="Log Meal"
-                    android:backgroundTint="@color/green"
-                    android:textColor="@color/white" />
-            </LinearLayout>
-
-            <!-- Progress Section - Placeholder for deciding what to display in this recycler view -->
-            <TextView
-                android:id="@+id/progress_section_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/quick_actions_layout"
-                android:layout_marginTop="20dp"
-                android:text="Your Progress"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                android:textColor="@color/green" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/progress_rv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/progress_section_tv"
-                android:layout_marginTop="10dp" />
-        </RelativeLayout>
+        </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

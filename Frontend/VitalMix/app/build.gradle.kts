@@ -43,5 +43,5 @@ dependencies {
     implementation(libs.converter.gson) // Gson converter
     implementation(libs.okhttp) // OkHttp core library
     implementation(libs.okhttp.logging) // Logging Interceptor
+    implementation(libs.mpandroidchart) // For Charts
 }
-

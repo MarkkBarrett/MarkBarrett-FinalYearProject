@@ -18,6 +18,7 @@ import com.example.vitalmix.models.WorkoutSession;
 import com.example.vitalmix.models.WorkoutExerciseLog;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +54,20 @@ public class WorkoutHistoryAdapter extends RecyclerView.Adapter<WorkoutHistoryAd
 
         // Set workout name and date
         holder.workoutNameTv.setText(session.getWorkoutName());
-        holder.sessionDateTv.setText("Date: " + session.getSessionDate().toString());
+        // parse backend ISO date and format like Apr 26, 2025
+        String rawDate = session.getSessionDate();
+        String formattedDate;
+        try {
+            Date date = new SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()
+            ).parse(rawDate);
+            formattedDate = new SimpleDateFormat(
+                    "MMM dd, yyyy", Locale.getDefault()
+            ).format(date);
+        } catch (Exception e) {
+            formattedDate = rawDate;
+        }
+        holder.sessionDateTv.setText(formattedDate);
 
         // Handle row click
         holder.itemView.setOnClickListener(v -> {

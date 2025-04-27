@@ -54,5 +54,4 @@ public class ApiClient {
     public static Type getWorkoutSessionListType() {
         return new TypeToken<List<WorkoutSession>>() {}.getType();
     }
-
 }
