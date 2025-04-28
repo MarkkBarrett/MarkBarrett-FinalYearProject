@@ -113,6 +113,38 @@ def extract_keypoints_for_model(video_path):
     cap.release()
     return np.array(frames_data, dtype=np.float32), angle_series
 
+def generate_feedback(angle_series, rep_ranges):
+    feedback_notes = []
+
+    # Add rep count feedback
+    feedback_notes.append(f"You completed {len(rep_ranges)} reps.")
+
+    # Count how many frames have a deep enough knee angle (below 90 degrees)
+    deep_reps = sum(1 for angle in angle_series if angle is not None and angle < 90)
+
+    if deep_reps == 0:
+        feedback_notes.append("Go deeper into the squat.")  # No frame deep enough
+
+    # Detect inconsistent reps
+    consecutive_shallow = 0
+    for angle in angle_series:
+        if angle is None:
+            continue
+        if angle > 140:
+            consecutive_shallow += 1
+        else:
+            consecutive_shallow = 0
+        if consecutive_shallow >= 18:
+            feedback_notes.append("Maintain lower depth throughout the squat.")
+            break
+
+    # more feeback possibly
+
+    if not feedback_notes:
+        feedback_notes.append("Excellent form!")  # Default if nothing wrong
+
+    return feedback_notes
+
     # Predict only during reps
     # Function to predict form accuracy
 def predict_form(video_path, exercise_name):
@@ -149,9 +181,10 @@ def predict_form(video_path, exercise_name):
 
     model_input = np.expand_dims(padded, axis=0)
     prediction = model.predict(model_input)[0][0]
-    accuracy = round(prediction * 100, 2)
-    feedback = "Excellent form!" if accuracy >= 90 else "Needs improvement."
-    return {"exercise": exercise_name, "accuracy": accuracy, "feedback": feedback}
+    accuracy = round((1 - prediction) * 100, 2) # model gives closert to 0 as more correct
+    feedback_list = generate_feedback(angle_series, rep_ranges)
+    return {"exercise": exercise_name, "accuracy": accuracy, "feedback": feedback_list}
+
 
 
 # Generate a processed video with keypoint overlay and labeled points
@@ -166,7 +199,7 @@ def process_and_overlay_video(input_path, output_path):
     fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Using 'avc1' for streamable mp4
     out = cv2.VideoWriter(output_path, fourcc, 30.0, (width, height))
 
-    # Only label these keypoints for now (used in squat form)
+    # Only label these keypoints
     keypoints_to_label = {
         "left_ankle", "left_knee", "left_hip",
         "right_ankle", "right_knee", "right_hip",
@@ -181,16 +214,36 @@ def process_and_overlay_video(input_path, output_path):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose_model.process(rgb)
 
+        # Store keypoints if detected
+        landmarks = {}
+
         if results.pose_landmarks:
             for idx, lm in enumerate(results.pose_landmarks.landmark):
-                x, y = int(lm.x * width), int(lm.y * height)
-                cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
-
-                # Get joint name from index
                 joint_name = mp_pose.PoseLandmark(idx).name.lower()
                 if joint_name in keypoints_to_label:
-                    cv2.putText(frame, joint_name.replace("_", " "), (x + 5, y - 5),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                    # Save the landmark x, y for easy access
+                    landmarks[joint_name] = (int(lm.x * width), int(lm.y * height))
+
+            #  Draw joints 
+            for joint, (x, y) in landmarks.items():
+                # Draw a bigger green circle for keypoints
+                cv2.circle(frame, (x, y), 8, (0, 255, 0), -1)
+                # Draw bigger white labels
+                cv2.putText(frame, joint.replace("_", " "), (x + 10, y - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+            #  Draw lines between joints if landmarks are available 
+            connecting_pairs = [
+                ("left_hip", "left_knee"),
+                ("left_knee", "left_ankle"),
+                ("right_hip", "right_knee"),
+                ("right_knee", "right_ankle")
+            ]
+
+            for start_joint, end_joint in connecting_pairs:
+                if start_joint in landmarks and end_joint in landmarks:
+                    # Draw white line for now, maybe change when in rep???
+                    cv2.line(frame, landmarks[start_joint], landmarks[end_joint], (255, 255, 255), 3)
 
         out.write(frame)
 
@@ -212,7 +265,7 @@ async def predict_form_api(file: UploadFile = File(...), exercise: str = Form(..
 
     prediction = predict_form(input_path, exercise)
 
-    # --- Save prediction to MongoDB ---
+    # Save prediction to MongoDB 
     form_results_collection.insert_one({
     "userId": userId,
     "exercise": exercise,
