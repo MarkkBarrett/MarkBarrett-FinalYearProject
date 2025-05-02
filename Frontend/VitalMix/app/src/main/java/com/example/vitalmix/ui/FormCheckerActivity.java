@@ -3,13 +3,19 @@ package com.example.vitalmix.ui;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+
 import com.example.vitalmix.R;
 import com.example.vitalmix.api.ApiClientFastAPI;
 import com.example.vitalmix.api.ApiResponseFastAPI;
@@ -19,6 +25,7 @@ import com.example.vitalmix.utils.FileUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -38,6 +45,9 @@ public class FormCheckerActivity extends AppCompatActivity {
     private ApiService apiService;
     private String userId;
     private ProgressDialog progressDialog;
+    private ImageView uploadThumbnail;
+    private TextView  uploadFilename;
+    private CardView resultsCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +57,23 @@ public class FormCheckerActivity extends AppCompatActivity {
         // Initialize UI components
         exerciseSpinner = findViewById(R.id.exercise_spinner);
         uploadText = findViewById(R.id.upload_text);
+        uploadThumbnail = findViewById(R.id.upload_thumbnail);
+        uploadFilename = findViewById(R.id.upload_filename);
         scoreText = findViewById(R.id.score_tv);
         feedbackText = findViewById(R.id.feedback_tv);
         calculateScoreBtn = findViewById(R.id.calculate_score_btn);
-        RelativeLayout uploadContainer = findViewById(R.id.upload_container);
+        CardView uploadContainer = findViewById(R.id.upload_container);
         resultVideoView = findViewById(R.id.processed_video_view);
         resultVideoView.setMediaController(new MediaController(this)); // Playback controls
+        resultsCard = findViewById(R.id.results_card);
+
+        // hide placeholders until real data arrives
+        uploadThumbnail.setVisibility(View.GONE);
+        uploadFilename.setVisibility(View.GONE);
+        scoreText.setText("");
+        feedbackText.setText("");
+        resultVideoView.setVisibility(View.GONE);
+        resultsCard.setVisibility(View.GONE);
 
         // Get user ID from session
         userId = SessionManager.getLoggedInUserID(this);
@@ -90,6 +111,17 @@ public class FormCheckerActivity extends AppCompatActivity {
         if (requestCode == VIDEO_PICK_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
             videoUri = data.getData();
             uploadText.setText("Video Selected");
+
+            // display filename
+            String path = FileUtils.getPath(this, videoUri);
+            File   file = new File(path);
+            uploadFilename.setText(file.getName());
+            uploadFilename.setVisibility(View.VISIBLE);
+
+            // display thumbnail
+            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MINI_KIND);
+            uploadThumbnail.setImageBitmap(thumb);
+            uploadThumbnail.setVisibility(View.VISIBLE);
         }
     }
 
@@ -111,7 +143,8 @@ public class FormCheckerActivity extends AppCompatActivity {
         // Timer to update messages every 12s
         new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Extracting keypoints from your video..."), 12000);
         new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Analysing your form..."), 28000);
-        new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Almost there..."), 36000);
+        new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Generating your Personal response video"), 36000);
+        new android.os.Handler().postDelayed(() -> progressDialog.setMessage("Almost there..."), 48000);
 
         Call<ApiResponseFastAPI> call = apiService.uploadFormCheck(videoPart, exerciseBody, userIdBody);
         call.enqueue(new Callback<ApiResponseFastAPI>() {
@@ -126,11 +159,17 @@ public class FormCheckerActivity extends AppCompatActivity {
                     Map<String, Object> data = response.body().getData();
                     if (data != null) {
                         double accuracy = (double) data.get("accuracy");
-                        String feedback = data.get("feedback").toString();
+                        @SuppressWarnings("unchecked")
+                        List<String> feedbackList = (List<String>) data.get("feedback");
+                        String feedback = TextUtils.join("\n", feedbackList);
                         String videoUrl = response.body().getVideoUrl();
 
                         scoreText.setText("Score: " + accuracy + "%");
                         feedbackText.setText("Feedback: " + feedback);
+
+                        // show results container
+                        resultsCard.setVisibility(View.VISIBLE);
+                        resultVideoView.setVisibility(View.VISIBLE);
 
                         if (videoUrl != null && !videoUrl.isEmpty()) {
                             playProcessedVideo(videoUrl);
@@ -168,7 +207,9 @@ public class FormCheckerActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_dashboard) {
-                startActivity(new Intent(this, DashboardActivity.class));
+                Intent intent = new Intent(this, DashboardActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //start dashboard fresh
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_workouts) {
                 startActivity(new Intent(this, ChooseWorkoutActivity.class));

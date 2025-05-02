@@ -261,7 +261,9 @@ public class ProfileActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_dashboard) {
-                startActivity(new Intent(this, DashboardActivity.class));
+                Intent intent = new Intent(this, DashboardActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //start dashboard fresh
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_workouts) {
                 startActivity(new Intent(this, ChooseWorkoutActivity.class));
@@ -274,7 +276,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
             return false;
         });
-
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
     }
 }

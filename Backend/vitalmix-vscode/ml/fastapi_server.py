@@ -1,210 +1,209 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import FileResponse
+from pymongo import MongoClient
+from datetime import datetime
 import tensorflow as tf
 import numpy as np
 import cv2
 import mediapipe as mp
 import os
-from pymongo import MongoClient
-from datetime import datetime
 
-# MongoDB Setup
-MONGO_URI = "mongodb://localhost:27017"  # or your Atlas connection string
-mongo_client = MongoClient(MONGO_URI)
-db = mongo_client["VitalMix"]  # Database 
-form_results_collection = db["formResults"]  # Collection name
-
-# Initialize FastAPI app
+# Initialize FastAPI application
 app = FastAPI()
 print("FastAPI working directory:", os.getcwd())
 
-# Load new LSTM model
-MODEL_PATH = r"C:\Users\User\VitalMixFYP\Backend\vitalmix-vscode\ml\form_check_lstm_model_v2.h5"
-model = tf.keras.models.load_model(MODEL_PATH)
+# Load trained LSTM model for form accuracy prediction
+MODEL_PATH = r"C:/Users/User/VitalMixFYP/Backend/vitalmix-vscode/ml/form_check_lstm_model_v3.h5"
+form_check_model = tf.keras.models.load_model(MODEL_PATH)
 
-# Define constants
-VIDEO_SAVE_DIR = os.path.join(os.path.dirname(__file__), "temp")  # Temporary save directory
+# Directory to temporarily save uploaded videos
+VIDEO_SAVE_DIR = os.path.join(os.path.dirname(__file__), "temp")
 os.makedirs(VIDEO_SAVE_DIR, exist_ok=True)
-
-KEYPOINTS = [
-    "left_shoulder", "left_hip", "left_knee", "left_ankle", "left_heel",
-    "right_shoulder", "right_hip", "right_knee", "right_ankle", "right_heel"
-]
-FEATURE_SIZE = len(KEYPOINTS) * 3 + 1  # x, y, visibility per point + 1 angle
 MAX_FRAMES = 100
 
-# Setup MediaPipe
+# Connect to MongoDB and select database and collection
+MONGO_URI = "mongodb://localhost:27017"
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client["VitalMix"]
+form_results_collection = db["formResults"]
+
+# Initialize MediaPipe Pose detector
 mp_pose = mp.solutions.pose
-pose_model = mp_pose.Pose()
+pose_detector = mp_pose.Pose()
 
-# Calculate joint angles
-def calculate_joint_angle(a, b, c):
-    if not all([a, b, c]):
+# Calculate the angle at point B formed by points A-B-C
+# point_a, point_b, point_c are [x, y] lists
+# returns angle in degrees, or None on error
+def calculate_joint_angle(point_a, point_b, point_c):
+    try:
+        a = np.array(point_a)
+        b = np.array(point_b)
+        c = np.array(point_c)
+        ab = a - b
+        cb = c - b
+        dot = np.dot(ab, cb)
+        norm = np.linalg.norm(ab) * np.linalg.norm(cb) + 1e-8
+        cosine = np.clip(dot / norm, -1.0, 1.0)
+        return float(np.degrees(np.arccos(cosine)))
+    except:
         return None
-    a, b, c = np.array(a), np.array(b), np.array(c)
-    ba = a - b
-    bc = c - b
-    cosine = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-8)
-    return float(np.degrees(np.arccos(np.clip(cosine, -1.0, 1.0))))
 
-# Detect reps using left knee angle thresholds
-def detect_reps_from_angles(angle_series, down_thresh=110, up_thresh=160):
-    reps = []
-    in_rep = False
-    start = 0
-    for i, angle in enumerate(angle_series):
-        if angle is None:
-            continue
-        if angle < down_thresh and not in_rep:
-            in_rep = True
-            start = i
-        elif angle > up_thresh and in_rep:
-            in_rep = False
-            reps.append((start, i))
-    return reps
-
-# Extract keypoints for model input
-def extract_keypoints_for_model(video_path):
+# Extract keypoints and angles from video frames for model input
+# Returns (feature_matrix, angle_series)
+def extract_keypoints_for_model(video_path, exercise_name):
     cap = cv2.VideoCapture(video_path)
     frames_data = []
     angle_series = []
 
+    # Define landmarks based on exercise
+    if exercise_name == "squat":
+        keypoints = [
+            "left_shoulder", "left_hip", "left_knee", "left_ankle", "left_heel",
+            "right_shoulder", "right_hip", "right_knee", "right_ankle", "right_heel"
+        ]
+    else:  # pushup
+        keypoints = [
+            "left_wrist", "left_elbow", "left_shoulder", "left_hip", "left_knee",
+            "right_wrist", "right_elbow", "right_shoulder", "right_hip", "right_knee"
+        ]
+
+    feature_len = len(keypoints) * 3 + 2  # x,y,visibility per point + angle + exercise name
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
+
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose_model.process(rgb)
+        results = pose_detector.process(rgb)
+
+        features = [0.0] * feature_len
+        angle = None
 
         if results.pose_landmarks:
-            kp_map = {}
-            for lbl in KEYPOINTS:
-                idx = getattr(mp_pose.PoseLandmark, lbl.upper(), None)
+            lm_map = {}
+            for name in keypoints:
+                idx = getattr(mp_pose.PoseLandmark, name.upper(), None)
                 if idx is not None:
                     lm = results.pose_landmarks.landmark[idx]
-                    kp_map[lbl] = [lm.x, lm.y, lm.visibility]
+                    lm_map[name] = [lm.x, lm.y, lm.visibility]
                 else:
-                    kp_map[lbl] = [0, 0, 0]
+                    lm_map[name] = [0.0, 0.0, 0.0]
 
-            # Get x/y for angle calc
-            try:
-                left_knee_angle = calculate_joint_angle(
-                    [kp_map["left_ankle"][0], kp_map["left_ankle"][1]],
-                    [kp_map["left_knee"][0], kp_map["left_knee"][1]],
-                    [kp_map["left_hip"][0], kp_map["left_hip"][1]]
+            # Compute joint angle
+            if exercise_name == "squat":
+                angle = calculate_joint_angle(
+                    lm_map["left_ankle"][:2], lm_map["left_knee"][:2], lm_map["left_hip"][:2]
                 )
-            except:
-                left_knee_angle = None
+            else:
+                angle = calculate_joint_angle(
+                    lm_map["left_wrist"][:2], lm_map["left_elbow"][:2], lm_map["left_shoulder"][:2]
+                )
 
-            angle_series.append(left_knee_angle)
+            # Flatten features into vector
+            idx = 0
+            for name in keypoints:
+                features[idx:idx+3] = lm_map[name]
+                idx += 3
+            features[idx] = angle if angle is not None else 0.0
+            features[idx+1] = 0 if exercise_name == "squat" else 1
 
-            # Flatten keypoints
-            frame_features = []
-            for lbl in KEYPOINTS:
-                x, y, v = kp_map.get(lbl, [0, 0, 0])
-                frame_features.extend([x, y, v])
-            frame_features.append(left_knee_angle if left_knee_angle is not None else 0)
-
-            frames_data.append(frame_features)
-        else:
-            frames_data.append([0] * FEATURE_SIZE)
-            angle_series.append(None)
+        frames_data.append(features)
+        angle_series.append(angle)
 
     cap.release()
     return np.array(frames_data, dtype=np.float32), angle_series
 
-def generate_feedback(angle_series, rep_ranges):
-    feedback_notes = []
+# Detect start/end indices of each rep based on angle thresholds on angle thresholds
+def detect_reps_from_angles(angle_series, exercise_name):
+    reps = []
+    in_rep = False
+    start = 0
 
-    # Add rep count feedback
-    feedback_notes.append(f"You completed {len(rep_ranges)} reps.")
+    if exercise_name == "squat":
+        down_threshold, up_threshold = 110, 160
+    else:
+        down_threshold, up_threshold = 130, 150
 
-    # Count how many frames have a deep enough knee angle (below 90 degrees)
-    deep_reps = sum(1 for angle in angle_series if angle is not None and angle < 90)
-
-    if deep_reps == 0:
-        feedback_notes.append("Go deeper into the squat.")  # No frame deep enough
-
-    # Detect inconsistent reps
-    consecutive_shallow = 0
-    for angle in angle_series:
-        if angle is None:
+    for i, a in enumerate(angle_series):
+        if a is None:
             continue
-        if angle > 140:
-            consecutive_shallow += 1
-        else:
-            consecutive_shallow = 0
-        if consecutive_shallow >= 18:
-            feedback_notes.append("Maintain lower depth throughout the squat.")
-            break
+        if not in_rep and a < down_threshold:
+            in_rep = True
+            start = i
+        elif in_rep and a > up_threshold:
+            in_rep = False
+            reps.append((start, i))
 
-    # more feeback possibly
+    return reps
 
-    if not feedback_notes:
-        feedback_notes.append("Excellent form!")  # Default if nothing wrong
+# Generate feedback messages based on reps and form quality
+def generate_feedback(angle_series, rep_ranges, exercise_name):
+    messages = [f"You completed {len(rep_ranges)} reps."]
 
-    return feedback_notes
+    if exercise_name == "squat":
+        deep_count = sum(1 for a in angle_series if a is not None and a < 90)
+        if deep_count == 0:
+            messages.append("Go deeper into your squat.")
+        else: messages.append("good form, only small tweaks!")
+    else:
+        shallow_count = sum(1 for a in angle_series if a is not None and a > 80)
+        if shallow_count == 0:
+            messages.append("Lower your body more during push-ups.")
 
-    # Predict only during reps
-    # Function to predict form accuracy
+    return messages or ["Excellent form!"]
+
+# Predict form accuracy and generate feedback for a video
 def predict_form(video_path, exercise_name):
-    all_frames, angle_series = extract_keypoints_for_model(video_path)
+    frames, angles = extract_keypoints_for_model(video_path, exercise_name)
+    reps = detect_reps_from_angles(angles, exercise_name)
 
-    # Detect rep segments
-    rep_ranges = detect_reps_from_angles(angle_series)
+    if not reps:
+        return {"exercise": exercise_name, "accuracy": 0.0,
+                "feedback": ["No valid reps detected."]}
 
-    if not rep_ranges:
-        return {
-            "exercise": exercise_name,
-            "accuracy": 0.0,
-            "feedback": "No valid reps detected."
-        }
-
-    # Collect only frames within rep ranges
     rep_frames = []
-    for start, end in rep_ranges:
-        rep_frames.extend(all_frames[start:end + 1])
+    for s, e in reps:
+        rep_frames.extend(frames[s:e+1])
 
     if not rep_frames:
-        return {
-            "exercise": exercise_name,
-            "accuracy": 0.0,
-            "feedback": "Reps found but no usable frames."
-        }
+        return {"exercise": exercise_name, "accuracy": 0.0,
+                "feedback": ["Reps found but no usable frames."]}
 
-    # Pad or trim to MAX_FRAMES
-    padded = np.zeros((MAX_FRAMES, FEATURE_SIZE), dtype=np.float32)
-    rep_frames = np.array(rep_frames, dtype=np.float32)
-    if len(rep_frames) > MAX_FRAMES:
-        rep_frames = rep_frames[-MAX_FRAMES:]
-    padded[-len(rep_frames):, :] = rep_frames
+    # Prepare input tensor for model
+    rep_arr = np.array(rep_frames, dtype=np.float32)
+    padded = np.zeros((MAX_FRAMES, rep_arr.shape[1]), dtype=np.float32)
+    if len(rep_arr) > MAX_FRAMES:
+        rep_arr = rep_arr[-MAX_FRAMES:]
+    padded[-len(rep_arr):] = rep_arr
 
-    model_input = np.expand_dims(padded, axis=0)
-    prediction = model.predict(model_input)[0][0]
-    accuracy = round((1 - prediction) * 100, 2) # model gives closert to 0 as more correct
-    feedback_list = generate_feedback(angle_series, rep_ranges)
-    return {"exercise": exercise_name, "accuracy": accuracy, "feedback": feedback_list}
+    prediction = form_check_model.predict(np.expand_dims(padded, axis=0))[0][0]
+    accuracy_pct = round((1 - prediction) * 100, 2)
+    feedback = generate_feedback(angles, reps, exercise_name)
 
+    return {"exercise": exercise_name, "accuracy": accuracy_pct, "feedback": feedback}
 
+# Generate processed video with keypoint overlays
+# Draws circles and labels on key joints
 
-# Generate a processed video with keypoint overlay and labeled points
 def process_and_overlay_video(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
-        print(f"ERROR: Cannot open video at {input_path}")
+        print(f"ERROR opening video: {input_path}")
         return False
 
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Using 'avc1' for streamable mp4
-    out = cv2.VideoWriter(output_path, fourcc, 30.0, (width, height))
+    writer = cv2.VideoWriter(
+        output_path,
+        cv2.VideoWriter_fourcc(*'avc1'),
+        30.0,
+        (width, height)
+    )
 
-    # Only label these keypoints
-    keypoints_to_label = {
-        "left_ankle", "left_knee", "left_hip",
-        "right_ankle", "right_knee", "right_hip",
-        "left_shoulder", "right_shoulder"
-    }
+    keypoints_to_draw = {"left_ankle","left_knee","left_hip",
+                         "right_ankle","right_knee","right_hip",
+                         "left_shoulder","right_shoulder"}
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -212,90 +211,72 @@ def process_and_overlay_video(input_path, output_path):
             break
 
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose_model.process(rgb)
-
-        # Store keypoints if detected
-        landmarks = {}
+        results = pose_detector.process(rgb)
+        points = {}
 
         if results.pose_landmarks:
             for idx, lm in enumerate(results.pose_landmarks.landmark):
-                joint_name = mp_pose.PoseLandmark(idx).name.lower()
-                if joint_name in keypoints_to_label:
-                    # Save the landmark x, y for easy access
-                    landmarks[joint_name] = (int(lm.x * width), int(lm.y * height))
+                name = mp_pose.PoseLandmark(idx).name.lower()
+                if name in keypoints_to_draw:
+                    points[name] = (int(lm.x * width), int(lm.y * height))
 
-            #  Draw joints 
-            for joint, (x, y) in landmarks.items():
-                # Draw a bigger green circle for keypoints
+            for name, (x, y) in points.items():
                 cv2.circle(frame, (x, y), 8, (0, 255, 0), -1)
-                # Draw bigger white labels
-                cv2.putText(frame, joint.replace("_", " "), (x + 10, y - 10),
+                cv2.putText(frame, name.replace("_", " " ), (x+10, y-10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
-            #  Draw lines between joints if landmarks are available 
-            connecting_pairs = [
-                ("left_hip", "left_knee"),
-                ("left_knee", "left_ankle"),
-                ("right_hip", "right_knee"),
-                ("right_knee", "right_ankle")
-            ]
+            connections = [("left_hip","left_knee"), ("left_knee","left_ankle"),
+                           ("right_hip","right_knee"), ("right_knee","right_ankle")]
+            for a, b in connections:
+                if a in points and b in points:
+                    cv2.line(frame, points[a], points[b], (255, 255, 255), 3)
 
-            for start_joint, end_joint in connecting_pairs:
-                if start_joint in landmarks and end_joint in landmarks:
-                    # Draw white line for now, maybe change when in rep???
-                    cv2.line(frame, landmarks[start_joint], landmarks[end_joint], (255, 255, 255), 3)
-
-        out.write(frame)
+        writer.write(frame)
 
     cap.release()
-    out.release()
+    writer.release()
     return os.path.exists(output_path)
 
-# Main endpoint
+# Main endpoint: receive video, run form prediction, save to DB, return result
 @app.post("/predict-form/")
-async def predict_form_api(file: UploadFile = File(...), exercise: str = Form(...), userId: str = Form(...)):
-    filename = file.filename
-    input_path = os.path.join(VIDEO_SAVE_DIR, filename).replace("\\", "/")
-    output_path = input_path.replace(".mp4", "_processed.mp4")
-
-    with open(input_path, "wb") as f:
+async def predict_form_api(file: UploadFile = File(...),exercise: str = Form(...),userId: str = Form(...)):
+    file_path = os.path.join(VIDEO_SAVE_DIR, file.filename)
+    with open(file_path, "wb") as f:
         f.write(await file.read())
+    print(f"Video uploaded: {file_path}")
 
-    print(f"Video uploaded at: {input_path}")
+    result = predict_form(file_path, exercise)
 
-    prediction = predict_form(input_path, exercise)
-
-    # Save prediction to MongoDB 
+    # Save result in MongoDB
     form_results_collection.insert_one({
-    "userId": userId,
-    "exercise": exercise,
-    "accuracy": prediction["accuracy"],
-    "feedback": [prediction["feedback"]],  # list for new feedback
-    "timestamp": datetime.utcnow()
+        "userId": userId,
+        "exercise": exercise,
+        "accuracy": result["accuracy"],
+        "feedback": result["feedback"],
+        "timestamp": datetime.utcnow()
     })
 
-    # Generate processed video with keypoints
-    success = process_and_overlay_video(input_path, output_path)
+    # Generate processed video with keypoints overlay
+    output_path = file_path.replace(".mp4", "_processed.mp4")
+    success = process_and_overlay_video(file_path, output_path)
     if not success:
-        return {"error": "Failed to generate processed video"}
+        return {"error": "Video processing failed"}
 
-    print(f"Processed video ready at: {output_path}")
-
+    print(f"Processed video saved at: {output_path}")
     return {
         "success": True,
         "message": "Prediction complete",
         "data": {
-            **prediction,
+            **result,   # unpack exercise, accuracy, feedback
             "video_url": f"http://10.0.2.2:8000/stream-video/?path=./temp/{os.path.basename(output_path)}"
         }
     }
 
-# Streaming endpoint (returns the processed video directly)
+# Streaming endpoint: serve processed video file
 @app.get("/stream-video/")
 async def stream_video(path: str):
     full_path = os.path.abspath(path)
     if not os.path.exists(full_path):
-        return {"error": "Video file not found"}
-    
-    print(f"Serving streamable video at: {full_path}")
-    return FileResponse(full_path, media_type="video/mp4", filename=os.path.basename(full_path))
+        return {"error": "File not found"}
+    print(f"Streaming video: {full_path}")
+    return FileResponse(full_path, media_type="video/mp4",filename=os.path.basename(full_path))

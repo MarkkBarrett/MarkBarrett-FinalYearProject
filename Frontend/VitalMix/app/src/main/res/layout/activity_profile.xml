@@ -127,6 +127,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Height:"
+                            android:textSize="16sp"
                             android:textColor="@color/white" />
 
                         <EditText
@@ -134,9 +135,12 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:inputType="number"
+                            android:inputType="numberDecimal"
+                            android:digits="0123456789."
+                            android:maxLength="3"
                             android:enabled="false"
                             android:background="@color/green"
+                            android:textSize="16sp"
                             android:textColor="@color/white"
                             android:padding="4dp" />
 
@@ -155,6 +159,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Weight:"
+                            android:textSize="16sp"
                             android:textColor="@color/white" />
 
                         <EditText
@@ -162,9 +167,12 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:inputType="number"
+                            android:inputType="numberDecimal"
+                            android:digits="0123456789."
+                            android:maxLength="3"
                             android:enabled="false"
                             android:background="@color/green"
+                            android:textSize="16sp"
                             android:textColor="@color/white"
                             android:padding="4dp" />
 
@@ -183,6 +191,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Age:"
+                            android:textSize="16dp"
                             android:textColor="@color/white" />
 
                         <EditText
@@ -191,9 +200,12 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:inputType="number"
+                            android:digits="0123456789"
+                            android:maxLength="3"
                             android:enabled="false"
                             android:background="@color/green"
                             android:textColor="@color/white"
+                            android:textSize="16sp"
                             android:padding="4dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -210,62 +222,50 @@
                 android:backgroundTint="@color/green" />
 
             <!-- Buttons Layout -->
-            <LinearLayout
-                android:id="@+id/button_layout"
+            <GridLayout
+                android:id="@+id/button_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/save_changes_btn"
                 android:layout_marginTop="10dp"
-                android:orientation="vertical">
+                android:columnCount="2"
+                android:rowCount="2"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="true">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <Button
+                    android:id="@+id/update_profile_btn"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp"
-                    android:weightSum="2">
+                    android:layout_columnWeight="1"
+                    android:text="Update Profile"
+                    android:backgroundTint="@color/green" />
 
-                    <Button
-                        android:id="@+id/update_profile_btn"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Update Profile"
-                        android:backgroundTint="@color/green" />
-
-                    <Button
-                        android:id="@+id/change_password_btn"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Change Password"
-                        android:backgroundTint="@color/green" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <Button
+                    android:id="@+id/change_password_btn"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp"
-                    android:weightSum="2">
+                    android:layout_columnWeight="1"
+                    android:text="New Password"
+                    android:backgroundTint="@color/green" />
 
-                    <Button
-                        android:id="@+id/logout_btn"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Logout"
-                        android:backgroundTint="@color/green" />
+                <Button
+                    android:id="@+id/logout_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Logout"
+                    android:backgroundTint="@color/green" />
 
-                    <Button
-                        android:id="@+id/delete_account_btn"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Delete Account"
-                        android:backgroundTint="@color/red" />
-                </LinearLayout>
-            </LinearLayout>
+                <Button
+                    android:id="@+id/delete_account_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Delete Account"
+                    android:backgroundTint="@color/red" />
+
+            </GridLayout>
         </RelativeLayout>
     </ScrollView>
 

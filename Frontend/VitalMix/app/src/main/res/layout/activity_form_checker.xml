@@ -7,8 +7,6 @@
     tools:context=".ui.FormCheckerActivity"
     android:background="@color/lightgreen">
 
-    <!-- Scrollable Content -->
-
     <!-- Bottom Navigation -->
     <ScrollView
         android:layout_width="match_parent"
@@ -29,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:text="Select Exercise and Angle:"
+                android:text="Select Exercise:"
                 android:textColor="@color/green"
                 android:textSize="16sp" />
 
@@ -54,33 +52,61 @@
                 android:textColor="@color/green"
                 android:textSize="16sp" />
 
-            <RelativeLayout
+            <androidx.cardview.widget.CardView
                 android:id="@+id/upload_container"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:layout_below="@id/upload_video_tv"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/border">
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
 
-                <ImageView
-                    android:id="@+id/upload_icon"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_centerInParent="true"
-                    android:src="@drawable/ic_video"
-                    app:tint="@color/green" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                <TextView
-                    android:id="@+id/upload_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/upload_icon"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="10dp"
-                    android:text="Tap to Upload"
-                    android:textColor="@color/green"
-                    android:textSize="14sp" />
-            </RelativeLayout>
+                    <!-- original upload icon -->
+                    <ImageView
+                        android:id="@+id/upload_icon"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/ic_video"
+                        app:tint="@color/green" />
+
+                    <!-- original hint text -->
+                    <TextView
+                        android:id="@+id/upload_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/upload_icon"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="10dp"
+                        android:text="Tap to Upload"
+                        android:textColor="@color/green"
+                        android:textSize="14sp" />
+
+                    <!-- new thumbnail preview -->
+                    <ImageView
+                        android:id="@+id/upload_thumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <!-- new filename label -->
+                    <TextView
+                        android:id="@+id/upload_filename"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_margin="8dp"
+                        android:text=""
+                        android:textColor="@color/green"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- Calculate Score Button -->
             <Button
@@ -103,45 +129,60 @@
                 android:layout_marginTop="20dp"
                 android:background="@color/green" />
 
-            <TextView
-                android:id="@+id/results_heading_tv"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/results_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/separator_line"
-                android:layout_marginTop="10dp"
-                android:text="Results"
-                android:textColor="@color/green"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="20dp"
+                android:layout_margin="20dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                android:visibility="gone">
 
-            <TextView
-                android:id="@+id/score_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/results_heading_tv"
-                android:layout_marginTop="10dp"
-                android:text="Score: -%"
-                android:textColor="@color/green"
-                android:textSize="16sp" />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/feedback_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/score_tv"
-                android:layout_marginTop="10dp"
-                android:text="Feedback: -"
-                android:textColor="@color/green"
-                android:textSize="16sp" />
+                    <TextView
+                        android:id="@+id/results_heading_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Results"
+                        android:textColor="@color/green"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-            <!-- Processed Video Display -->
-            <VideoView
-                android:id="@+id/processed_video_view"
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
-                android:layout_below="@id/feedback_tv"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp" />
+                    <TextView
+                        android:id="@+id/score_tv"
+                        android:layout_marginTop="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/green"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/feedback_tv"
+                        android:layout_marginTop="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/green"
+                        android:textSize="16sp" />
+
+                    <VideoView
+                        android:id="@+id/processed_video_view"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="400dp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
         </RelativeLayout>
     </ScrollView>
 
@@ -153,4 +194,4 @@
         app:menu="@menu/bottom_nav"
         app:labelVisibilityMode="labeled"
         android:background="@color/lightgreen" />
-</RelativeLayout> 
+</RelativeLayout>

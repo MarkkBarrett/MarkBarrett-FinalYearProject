@@ -2,6 +2,7 @@ package com.example.vitalmix.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -47,6 +48,13 @@ public class RegisterActivity extends AppCompatActivity {
             // Validate user input
             if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(RegisterActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Valid email format
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                emailET.setError("Please enter a valid email");
+                emailET.requestFocus();
                 return;
             }
 

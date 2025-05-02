@@ -1,6 +1,7 @@
 package com.example.vitalmix.ui;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MotionEvent;
@@ -179,7 +180,10 @@ public class DashboardActivity extends AppCompatActivity {
                     });
 
                 } else {
-                    lastWorkoutTv.setText("No recent workouts");
+                    lastWorkoutCard.setVisibility(View.VISIBLE);
+                    cardWorkoutName.setText("Last workout!");
+                    cardWorkoutDate.setText("Pick a workout plan and complete your first workout!");
+                    cardExercisesContainer.setVisibility(View.GONE);
                 }
             }
 
@@ -192,6 +196,8 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void setupChart() {
         formAccuracyPercent.setNoDataText("No form data"); // text if no results
+        formAccuracyPercent.setNoDataTextColor(ContextCompat.getColor(this, R.color.green));
+        formAccuracyPercent.setNoDataTextTypeface(Typeface.DEFAULT_BOLD);
 
         String userId = SessionManager.getLoggedInUserID(this);
         ApiClient.getApiService().getFormResults(userId, "squat", 5).enqueue(new Callback<ApiResponse>() {

@@ -19,9 +19,9 @@ public class ApiClientFastAPI {
 
             // Increase timeout limits to prevent connection errors
             OkHttpClient client = new OkHttpClient.Builder()
-                    .connectTimeout(60, TimeUnit.SECONDS)  // Increase connection timeout
-                    .readTimeout(60, TimeUnit.SECONDS)     // Increase read timeout
-                    .writeTimeout(60, TimeUnit.SECONDS)    // Increase write timeout
+                    .connectTimeout(90, TimeUnit.SECONDS)  // Increase connection timeout
+                    .readTimeout(90, TimeUnit.SECONDS)     // Increase read timeout
+                    .writeTimeout(90, TimeUnit.SECONDS)    // Increase write timeout
                     .addInterceptor(logging)              // Attach logging interceptor
                     .build();
 

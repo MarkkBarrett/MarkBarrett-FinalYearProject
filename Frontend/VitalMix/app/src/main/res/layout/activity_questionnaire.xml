@@ -39,6 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Male, Female, Other"
+                android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
                 android:layout_below="@id/gender_tv"
                 android:padding="3dp"
                 android:background="@drawable/border" />
@@ -57,6 +58,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Age"
+                android:inputType="number"
+                android:digits="0123456789"
+                android:maxLength="3"
                 android:layout_below="@id/age_tv"
                 android:padding="3dp"
                 android:background="@drawable/border" />
@@ -87,6 +91,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="cm"
+                        android:inputType="numberDecimal"
+                        android:digits="0123456789."
+                        android:maxLength="3"
                         android:padding="3dp"
                         android:background="@drawable/border" />
                 </LinearLayout>
@@ -110,6 +117,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="kg"
+                        android:inputType="numberDecimal"
+                        android:digits="0123456789."
+                        android:maxLength="3"
                         android:padding="3dp"
                         android:background="@drawable/border" />
                 </LinearLayout>

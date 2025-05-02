@@ -47,17 +47,10 @@
                     android:id="@+id/start_workout_btn"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_columnSpan="2"
+                    android:layout_row="0"
                     android:layout_columnWeight="1"
                     android:text="Start Workout"
-                    android:backgroundTint="@color/green"
-                    android:textColor="@color/white" />
-
-                <Button
-                    android:id="@+id/create_plan_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="Create a Plan"
                     android:backgroundTint="@color/green"
                     android:textColor="@color/white" />
 
@@ -65,6 +58,8 @@
                     android:id="@+id/view_progress_btn"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_row="1"
+                    android:layout_column="0"
                     android:layout_columnWeight="1"
                     android:text="View Progress"
                     android:backgroundTint="@color/green"
@@ -74,10 +69,13 @@
                     android:id="@+id/workout_history_btn"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_row="1"
+                    android:layout_column="1"
                     android:layout_columnWeight="1"
                     android:text="Workout History"
                     android:backgroundTint="@color/green"
                     android:textColor="@color/white" />
+
             </GridLayout>
 
             <!-- Section Header -->

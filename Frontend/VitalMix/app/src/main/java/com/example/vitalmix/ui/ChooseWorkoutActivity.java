@@ -132,11 +132,8 @@ public class ChooseWorkoutActivity extends AppCompatActivity {
         findViewById(R.id.start_workout_btn).setOnClickListener(v ->
                 startActivity(new Intent(this, StartWorkoutActivity.class)));
 
-        findViewById(R.id.create_plan_btn).setOnClickListener(v ->
-                Toast.makeText(this, "Create Workout Plan coming soon", Toast.LENGTH_SHORT).show());
-
         findViewById(R.id.view_progress_btn).setOnClickListener(v ->
-                Toast.makeText(this, "View Progress coming soon", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, ViewProgressActivity.class)));
 
         findViewById(R.id.workout_history_btn).setOnClickListener(v ->
                 startActivity(new Intent(this, ViewWorkoutHistoryActivity.class)));
@@ -149,7 +146,9 @@ public class ChooseWorkoutActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_dashboard) {
-                startActivity(new Intent(this, DashboardActivity.class));
+                Intent intent = new Intent(this, DashboardActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //start dashboard fresh
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_workouts) {
                 return true; // Stay on this page

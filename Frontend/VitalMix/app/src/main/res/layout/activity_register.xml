@@ -48,6 +48,7 @@
             android:hint="Enter your first name"
             android:padding="3dp"
             android:inputType="textPersonName"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
             android:layout_below="@id/fname_tv"
             android:background="@drawable/border"/>
 
@@ -67,6 +68,7 @@
             android:hint="Enter your last name"
             android:padding="3dp"
             android:inputType="textPersonName"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
             android:layout_below="@id/lname_tv"
             android:background="@drawable/border"/>
 

@@ -1,0 +1,113 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.ViewProgressActivity"
+    android:background="@color/lightgreen">
+
+    <!-- Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation"
+        android:layout_marginBottom="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@drawable/border"
+            android:padding="20dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/progress_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Workout Progress"
+                android:textColor="@color/green"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Sessions in Last 7 Days Chart -->
+            <TextView
+                android:id="@+id/sessions_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/progress_title"
+                android:layout_marginTop="15dp"
+                android:text="Sessions Last 7 Days:"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/sessions_week_chart"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@id/sessions_label"
+                android:layout_marginTop="10dp" />
+
+            <!-- Start Workout Button -->
+            <Button
+                android:id="@+id/start_workout_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/sessions_week_chart"
+                android:layout_marginTop="20dp"
+                android:text="Start Workout"
+                android:backgroundTint="@color/green"
+                android:textColor="@color/white" />
+
+            <!-- Weight Progress Line Chart -->
+            <TextView
+                android:id="@+id/weight_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/start_workout_btn"
+                android:layout_marginTop="30dp"
+                android:text="Weight Progress:"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+            <Spinner
+                android:id="@+id/exercise_spinner_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/weight_label"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/border"
+                android:padding="4dp" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/weight_progress_chart"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@id/exercise_spinner_history"
+                android:layout_marginTop="10dp" />
+
+            <!-- Workout History Button -->
+            <Button
+                android:id="@+id/history_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/weight_progress_chart"
+                android:layout_marginTop="20dp"
+                android:text="View Workout History"
+                android:backgroundTint="@color/green"
+                android:textColor="@color/white" />
+
+        </RelativeLayout>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav"
+        app:labelVisibilityMode="labeled"
+        android:background="@color/lightgreen" />
+
+</RelativeLayout>

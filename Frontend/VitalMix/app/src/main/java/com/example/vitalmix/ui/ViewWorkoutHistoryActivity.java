@@ -33,6 +33,7 @@ public class ViewWorkoutHistoryActivity extends AppCompatActivity {
     private ApiService apiService;
     private String userId;
     private TextView titleTv;
+    private String firstName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +48,11 @@ public class ViewWorkoutHistoryActivity extends AppCompatActivity {
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         titleTv = findViewById(R.id.history_title_tv);
 
-        // Get user ID from session
+        // Get user ID & name from session
         userId = SessionManager.getLoggedInUserID(this);
-
+        firstName = SessionManager.getLoggedInUserFirstName(this);
         // Set title
         String firstName = SessionManager.getLoggedInUserFirstName(this);
-        titleTv.setText(firstName + "'s Workout History");
 
         // Load workout history
         fetchWorkoutHistory();
@@ -72,13 +72,15 @@ public class ViewWorkoutHistoryActivity extends AppCompatActivity {
                             ApiClient.getWorkoutSessionListType()
                     );
 
+                    titleTv.setText(firstName + "'s Workout History");
+
                     // Attach adapter
                     historyAdapter = new WorkoutHistoryAdapter(ViewWorkoutHistoryActivity.this, sessions);
                     historyRecyclerView.setAdapter(historyAdapter);
 
                     Log.d("workout_debug", "Workout history loaded: " + sessions.size() + " sessions");
                 } else {
-                    Toast.makeText(ViewWorkoutHistoryActivity.this, "Failed to load workout history", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ViewWorkoutHistoryActivity.this, "You have no workout history. Start your first workout!", Toast.LENGTH_SHORT).show();
                     Log.e("API_ERROR", "Workout history fetch failed");
                 }
             }
@@ -98,7 +100,9 @@ public class ViewWorkoutHistoryActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_dashboard) {
-                startActivity(new Intent(this, DashboardActivity.class));
+                Intent intent = new Intent(this, DashboardActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //start dashboard fresh
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_workouts) {
                 startActivity(new Intent(this, ChooseWorkoutActivity.class));
