@@ -195,7 +195,7 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void setupChart() {
-        formAccuracyPercent.setNoDataText("No form data"); // text if no results
+        formAccuracyPercent.setNoDataText("No form data to display yet"); // text if no results
         formAccuracyPercent.setNoDataTextColor(ContextCompat.getColor(this, R.color.green));
         formAccuracyPercent.setNoDataTextTypeface(Typeface.DEFAULT_BOLD);
 

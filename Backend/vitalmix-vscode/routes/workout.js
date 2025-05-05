@@ -73,10 +73,15 @@ router.get('/recommendation', async (req, res) => {
         if (activityLevel.includes('Very') || activityLevel.includes('Extra')) level = 'Advanced';
 
         // Match plan by goal and level
-        const plan = await DefaultWorkoutPlan.findOne({
+        let plan = await DefaultWorkoutPlan.findOne({
             focus: fitnessGoals,
             planName: new RegExp(level, 'i')
         });
+
+        // Fallback: if no level specific plan, get any plan that matches the goal
+        if (!plan) {
+            plan = await DefaultWorkoutPlan.findOne({ focus: fitnessGoals });
+        }
 
         if (!plan) {
             return res.status(404).json({ success: false, message: 'No matching plan found' });

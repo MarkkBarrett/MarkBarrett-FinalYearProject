@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from pymongo import MongoClient
+from typing import List, Optional, Tuple
 from datetime import datetime
 import tensorflow as tf
 import numpy as np
@@ -138,20 +139,82 @@ def detect_reps_from_angles(angle_series, exercise_name):
     return reps
 
 # Generate feedback messages based on reps and form quality
-def generate_feedback(angle_series, rep_ranges, exercise_name):
-    messages = [f"You completed {len(rep_ranges)} reps."]
+def generate_feedback(angle_series: List[Optional[float]],
+                      rep_ranges: List[Tuple[int, int]],
+                      exercise_name: str,
+                      accuracy_pct: float) -> List[str]:
+    
+    # return a list of feedback based on model predicted accuracy and depth
+    rep_count = len(rep_ranges)
+    messages = [f"You completed {rep_count} reps with {accuracy_pct}% form accuracy."]
 
-    if exercise_name == "squat":
-        deep_count = sum(1 for a in angle_series if a is not None and a < 90)
-        if deep_count == 0:
-            messages.append("Go deeper into your squat.")
-        else: messages.append("good form, only small tweaks!")
+    if exercise_name.lower() == "squat":
+        # Count reps where any angle in that rep is < 105°
+        deep_rep_count = sum(
+            1
+            for (start, end) in rep_ranges
+            if any(a is not None and a < 105 for a in angle_series[start : end + 1])
+        )
+
+        # Depth feedback
+        if rep_count == 0:
+            messages.append("No valid squat reps detected.")
+        elif deep_rep_count == 0:
+            messages.append(
+                "No reps reached perfect depth (knee angle < 90°). "
+                "Focus on lowering until your hip crease drops below your knee level."
+            )
+        else:
+            messages.append(
+                f"{deep_rep_count}/{rep_count} reps hit good depth—nice work getting deep!"
+            )
+
+        # Accuracy-based tips
+        if accuracy_pct < 30:
+            messages += [
+                "Engage your core: brace your abs before each rep.",
+                "Push hips back: imagine sitting onto a chair.",
+                "Knees over toes: keep knees tracking straight.",
+                "Slow it down: use a 3-second descent to get used to the movement.",
+                "Practice depth: break at parallel and hold for 1 second."
+            ]
+        elif accuracy_pct < 50:
+            messages += [
+                "Good core engagement – keep that up!",
+                "Drive through heels to maintain balance.",
+                "Aim for deeper bottom position (hip crease below knee).",
+                "Keep chest up and lift your gaze forward.",
+                "Control your ascent: avoid bouncing at the bottom."
+            ]
+        elif accuracy_pct < 70:
+            messages += [
+                "Nice posture – chest and back are staying upright.",
+                "You’re hitting depth consistently – keep it up!",
+                "Work on tempo: pause 1 second at the bottom for strength.",
+                "Watch knee alignment: don’t let them cave in.",
+                "Smooth it out: avoid any jerky transitions."
+            ]
+        elif accuracy_pct < 90:
+            messages += [
+                "Excellent depth and posture.",
+                "Focus on explosive drive from the bottom.",
+                "Try tempo variations: slow descent, fast ascent is best.",
+                "Add a slight pause at the top to reset tension."
+            ]
+        else:
+            messages += [
+                "Form is spot-on: depth, alignment and control are all there.",
+                "To challenge yourself: add a 2-second bottom hold or tempo squats.",
+                "Consider increasing your weight or volume for progressive overload."
+            ]
+
     else:
+        # push-up logic not relevant
         shallow_count = sum(1 for a in angle_series if a is not None and a > 80)
         if shallow_count == 0:
             messages.append("Lower your body more during push-ups.")
 
-    return messages or ["Excellent form!"]
+    return messages
 
 # Predict form accuracy and generate feedback for a video
 def predict_form(video_path, exercise_name):
@@ -179,7 +242,7 @@ def predict_form(video_path, exercise_name):
 
     prediction = form_check_model.predict(np.expand_dims(padded, axis=0))[0][0]
     accuracy_pct = round((1 - prediction) * 100, 2)
-    feedback = generate_feedback(angles, reps, exercise_name)
+    feedback = generate_feedback(angles, reps, exercise_name, accuracy_pct)
 
     return {"exercise": exercise_name, "accuracy": accuracy_pct, "feedback": feedback}
 

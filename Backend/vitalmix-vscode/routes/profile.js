@@ -156,6 +156,10 @@ router.delete('/delete', async (req, res) => {
         const WorkoutSession = require('../models/WorkoutSession');
         await WorkoutSession.deleteMany({ userId });
 
+        // Delete associated formResults (if any)
+        const FormResult = require('../models/FormResult');
+        await FormResult.deleteMany({ userId });
+
         // Response
         res.status(200).json({ success: true, message: 'Account and all associated data deleted successfully' });
 
